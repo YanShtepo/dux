@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>СЗС — разметка спецификации (ветка «дерево»)</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef0f4;--surface:#fff;--border:#d7dce4;--border-strong:#b7bfcc;--text:#1b2333;--muted:#687082;--faint:#98a0b0;
+  --accent:#2f4468;--accent-strong:#1f2f4d;--accent-soft:#e6eaf3;--success:#1e8f63;--success-soft:#e2f4ec;
+  --warning:#b9790a;--warning-soft:#fbf0d8;--danger:#c94444;--danger-soft:#fbeaea;--sel:#dbe6fb;--tg:#fff3cf;
+  --ui:'IBM Plex Sans',-apple-system,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);font-family:var(--ui);color:var(--text);font-size:13px;display:flex;flex-direction:column;overflow:hidden}
+.hidden{display:none!important}
+.top{background:var(--accent-strong);color:#fff;padding:8px 16px;display:flex;align-items:center;gap:18px;flex:none}
+.top h1{font-size:15px;font-weight:600;margin:0}
+.top .meta{font-size:11.5px;color:#c3ccdd}
+.tabs{display:flex;gap:2px;margin-left:12px}
+.tab{background:none;border:0;color:#c3ccdd;padding:7px 14px;border-radius:4px 4px 0 0;cursor:pointer;font:inherit;font-weight:500}
+.tab:hover{background:#2c3f63}
+.tab.on{background:var(--bg);color:var(--accent-strong)}
+.sp{flex:1}
+.prog{display:flex;align-items:center;gap:8px;font-size:12px}
+.bar{width:160px;height:7px;background:#3a4d73;border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:#5fd1a0;width:0}
+.btn{font:inherit;font-size:12.5px;padding:5px 11px;border:1px solid var(--border-strong);background:#fff;border-radius:4px;cursor:pointer;color:var(--text);display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.btn:hover{background:#f2f4f8}
+.btn.pr{background:var(--accent);border-color:var(--accent);color:#fff}.btn.pr:hover{background:var(--accent-strong)}
+.btn.gh{border-color:transparent;background:transparent}
+.btn.sm{padding:2px 7px;font-size:11.5px}
+.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+input,select{font:inherit;font-size:12.5px}
+.split{flex:1;display:grid;grid-template-columns:1.25fr 1fr;gap:10px;padding:10px;min-height:0}
+.split3{flex:1;display:grid;grid-template-columns:300px 1.3fr 1fr;gap:10px;padding:10px;min-height:0}
+.pane{background:var(--surface);border:1px solid var(--border);border-radius:6px;display:flex;flex-direction:column;min-height:0;min-width:0;position:relative}
+.ph{padding:9px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:#f6f7fa;border-radius:6px 6px 0 0}
+.ph b{font-size:13px}
+.ph small{color:var(--muted)}
+.tb{padding:7px 10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.tb input[type=search],.tb input[type=text]{padding:5px 9px;border:1px solid var(--border-strong);border-radius:4px;min-width:0;flex:1}
+.tb select{padding:5px;border:1px solid var(--border-strong);border-radius:4px}
+.cols,.vr{display:grid;grid-template-columns:26px 54px 112px 96px 1fr 40px 56px 48px;align-items:center;gap:0 6px;padding:0 10px}
+.cols{height:26px;background:#f0f2f6;border-bottom:1px solid var(--border-strong);font-size:11px;font-weight:600;color:var(--muted)}
+.vl{flex:1;overflow:auto;position:relative}
+#vwin{position:absolute;left:0;right:0;top:0}
+.vr{height:30px;border-bottom:1px solid #eceff3;cursor:pointer;user-select:none;font-size:12.5px}
+.vr>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vr:hover{background:#f5f7fb}
+.vr.sel{background:var(--sel)}
+.vr.sec{background:#e4e9f2;font-weight:600;color:var(--accent-strong);grid-template-columns:26px auto 1fr auto;}
+.vr.sec span{font-weight:400;color:var(--muted);font-size:11.5px}
+.mono{font-family:var(--mono);font-size:12px}
+.chip{font-size:11px;padding:1px 7px;border-radius:10px;text-align:center;font-weight:500}
+.chip.no{background:var(--danger-soft);color:var(--danger)}
+.chip.ok{background:var(--success-soft);color:var(--success)}
+.chip.multi{background:var(--accent-soft);color:var(--accent)}
+.dirty{background:var(--warning-soft);color:var(--warning);border-radius:3px;padding:0 3px}
+.selbar{position:absolute;left:10px;right:10px;bottom:10px;background:var(--accent-strong);color:#fff;border-radius:8px;padding:9px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;box-shadow:0 6px 22px rgba(20,30,60,.35)}
+.selbar .btn{background:#2c4069;border-color:#46577a;color:#fff}.selbar .btn:hover{background:#3a4d73}
+.selbar .btn.pr{background:#fff;color:var(--accent-strong);border-color:#fff}
+.hint{padding:6px 12px;font-size:11.5px;color:var(--muted);border-top:1px solid var(--border);background:#fafbfc;border-radius:0 0 6px 6px}
+/* tree */
+.tree{flex:1;overflow:auto;padding:4px 0 70px}
+.nd{display:flex;align-items:center;gap:5px;padding:3px 8px;border-bottom:1px solid #f0f2f6;border-left:3px solid transparent}
+.nd:hover{background:#f7f9fc}
+.nd.tg{background:var(--tg);border-left-color:var(--warning)}
+.nd.dropping{outline:2px dashed var(--accent);outline-offset:-2px;background:var(--accent-soft)}
+.nd.dim .nm{color:var(--faint);text-decoration:line-through}
+.chev{border:0;background:none;width:18px;cursor:pointer;color:var(--muted);padding:0}
+.ico{color:var(--accent);width:14px}
+.nd input{border:1px solid transparent;background:transparent;border-radius:3px;padding:3px 4px;min-width:0;color:var(--text)}
+.nd input:hover{border-color:var(--border)}.nd input:focus{border-color:var(--accent);background:#fff;outline:none}
+.nd .nm{flex:1;font-weight:500}.nd .un{width:46px}.nd .qt{width:62px;text-align:right}
+.bd{font-size:11px;padding:1px 7px;border-radius:10px;white-space:nowrap}
+.bd.ok{background:var(--success-soft);color:var(--success)}.bd.no{background:var(--danger-soft);color:var(--danger)}
+.ib{border:0;background:none;cursor:pointer;color:var(--faint);width:22px;height:22px;border-radius:3px;font-size:13px}
+.ib:hover{background:#eef0f5;color:var(--text)}.ib.dn:hover{background:var(--danger-soft);color:var(--danger)}.ib.on{color:var(--warning)}
+.empty{margin:auto;padding:24px;max-width:430px;text-align:center;color:var(--muted)}
+.empty h3{color:var(--text);margin:0 0 6px}
+.cards{display:flex;flex-direction:column;gap:8px;margin-top:14px;text-align:left}
+.card{border:1px solid var(--border-strong);border-radius:6px;padding:10px 12px;background:#fff;cursor:pointer;font:inherit;text-align:left}
+.card:hover{border-color:var(--accent);background:var(--accent-soft)}
+.card b{display:block;color:var(--accent-strong);margin-bottom:2px}.card span{font-size:12px;color:var(--muted)}
+/* eng */
+.list{flex:1;overflow:auto}
+.ei{padding:6px 10px;border-bottom:1px solid #eceff3;cursor:pointer;display:grid;grid-template-columns:12px 1fr auto;gap:2px 8px;align-items:center}
+.ei:hover{background:#f5f7fb}.ei.on{background:var(--tg)}
+.ei small{grid-column:2;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ei .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.st-ok{background:var(--success)}.st-warn{background:var(--warning)}.st-empty{background:var(--danger)}
+table.ot{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
+table.ot th{background:#f0f2f6;color:var(--muted);font-size:11px;text-align:left;padding:5px 6px;border-bottom:1px solid var(--border-strong)}
+table.ot td{padding:2px 4px;border-bottom:1px solid #eceff3}
+table.ot input{width:100%;border:1px solid transparent;background:transparent;padding:3px 4px;border-radius:3px}
+table.ot input:hover{border-color:var(--border)}table.ot input:focus{border-color:var(--accent);background:#fff;outline:none}
+.body{padding:12px;overflow:auto;flex:1}
+.kv{display:flex;gap:16px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin:2px 0 10px}
+.kv b{color:var(--text)}
+.sum{margin:8px 0;padding:6px 10px;border-radius:4px;font-size:12px}
+.sum.ok{background:var(--success-soft);color:var(--success)}.sum.warn{background:var(--warning-soft);color:var(--warning)}.sum.info{background:#eceff4;color:var(--muted)}
+.picker{margin-top:12px;border:1px dashed var(--border-strong);border-radius:6px;padding:8px;background:#fafbfc}
+.res{max-height:190px;overflow:auto;margin-top:6px;border:1px solid var(--border);border-radius:4px;background:#fff}
+.res div{display:grid;grid-template-columns:70px 100px 1fr 40px;gap:6px;padding:4px 8px;border-bottom:1px solid #eceff3;cursor:pointer;font-size:12px}
+.res div:hover{background:var(--accent-soft)}
+.src{display:grid;grid-template-columns:100px 1fr 44px 64px 28px;gap:6px;padding:4px 10px;border-bottom:1px solid #eceff3;align-items:center;font-size:12px}
+.src>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv{margin:10px;background:#fff;border:1px solid var(--border);border-radius:6px;overflow:auto;flex:1}
+.pv table{width:100%;border-collapse:collapse}.pv th,.pv td{padding:5px 10px;border-bottom:1px solid #eceff3;text-align:left}
+.pv th{background:#f0f2f6;font-size:11px;color:var(--muted)}
+.pv tr.g td{background:#e9edf5;font-weight:600}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--accent-strong);color:#fff;padding:9px 16px;border-radius:6px;opacity:0;pointer-events:none;transition:all .18s;z-index:100}
+#toast.show{opacity:1;transform:translateX(-50%)}
+/* ---- v2 additions ---- */
+.vwin0{position:absolute;left:0;right:0;top:0}
+.chip.warn{background:var(--warning-soft);color:var(--warning)}
+.st-new{background:#e0a800}
+.pane.full{position:fixed;inset:8px;z-index:60;box-shadow:0 0 0 100vmax rgba(20,30,60,.5)}
+.addbar{display:flex;gap:14px;padding:8px 10px;border-bottom:1px solid var(--border);background:#fafbfc;flex-wrap:wrap;flex:none}
+.addbar input{padding:5px 8px;border:1px solid var(--border-strong);border-radius:4px;min-width:0}
+.ab1{position:relative;width:250px}
+.ab2{flex:1;min-width:420px}
+.lbl{font-size:11px;color:var(--muted);margin-bottom:3px;font-weight:600}
+.arow{display:flex;gap:6px}
+.pop{position:absolute;top:100%;left:0;width:600px;max-width:80vw;z-index:30;box-shadow:0 8px 24px rgba(20,30,60,.25);margin-top:2px;max-height:280px;overflow:auto;border:1px solid var(--border-strong);border-radius:4px;background:#fff}
+.pop div{display:grid;grid-template-columns:62px 100px 1fr 40px;gap:6px;padding:5px 8px;border-bottom:1px solid #eceff3;cursor:pointer;font-size:12px}
+.pop div:hover{background:var(--accent-soft)}
+.ocols,.or{display:grid;grid-template-columns:34px 76px 120px 110px 1fr 50px 70px 150px 28px;gap:0 4px;align-items:center;padding:0 8px}
+.ocols{height:26px;background:#f0f2f6;border-bottom:1px solid var(--border-strong);font-size:11px;font-weight:600;color:var(--muted);flex:none}
+.or{height:32px;border-bottom:1px solid #eceff3;font-size:12.5px}
+.or input{width:100%;border:1px solid transparent;background:transparent;padding:3px 4px;border-radius:3px;min-width:0}
+.or input:hover{border-color:var(--border)}.or input:focus{border-color:var(--accent);background:#fff;outline:none}
+.or.new{background:#fff1c9;box-shadow:inset 3px 0 0 var(--warning)}
+.tagnew{font-size:10px;background:var(--warning);color:#fff;border-radius:3px;padding:1px 5px;font-weight:600;white-space:nowrap}
+.srow{display:grid;grid-template-columns:104px 1fr 46px 76px 88px 30px;gap:6px;align-items:center;padding:0 10px;height:30px;border-bottom:1px solid #eceff3;font-size:12px}
+.srow>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.srow.used{background:var(--success-soft);color:var(--muted)}
+.srow.rest{box-shadow:inset 3px 0 0 var(--warning)}
+.fcols,.fr{display:grid;grid-template-columns:56px 84px 120px 110px 1fr 50px 70px 170px;gap:0 6px;align-items:center;padding:0 10px}
+.fcols{height:26px;background:#f0f2f6;border-bottom:1px solid var(--border-strong);font-size:11px;font-weight:600;color:var(--muted)}
+.fr{height:30px;border-bottom:1px solid #eceff3;font-size:12.5px}
+.fr>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fr.fg{background:#e4e9f2;font-weight:600;color:var(--accent-strong)}
+.fr.fp{background:#f4f6fa;font-weight:500}
+.fr.fo.new{background:#fff1c9;box-shadow:inset 3px 0 0 var(--warning)}
+.fr .mu{color:var(--muted);font-size:11.5px}
+.tb label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.srow{grid-template-columns:104px 1fr 46px 76px 140px 56px;cursor:pointer;user-select:none}
+.srow.pick{background:#dbe6fb}
+.srow .chip{overflow:hidden;text-overflow:ellipsis}
+.ocols,.or{grid-template-columns:34px 76px 120px 110px 1fr 50px 70px 150px 56px}
+.bindbar{flex-basis:100%;background:#dbe6fb;border:1px solid #9fb3d6;border-radius:4px;padding:6px 10px;font-size:12px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+.or{cursor:pointer}
+.or.osel{outline:2px solid #6b4fd8;outline-offset:-2px;background:#f1edfd}
+.srow.lk{background:#e8e1fb;box-shadow:inset 4px 0 0 #6b4fd8}
+.srow.qd{box-shadow:inset -4px 0 0 var(--danger)}
+.srow.lk.qd{box-shadow:inset 4px 0 0 #6b4fd8,inset -4px 0 0 var(--danger)}
+.or input.qbad{background:var(--warning-soft);box-shadow:inset 0 0 0 1px var(--warning);color:var(--danger);font-weight:600}
+.srow.ud{box-shadow:inset -4px 0 0 #e07b00;background:repeating-linear-gradient(135deg,#fff3e0,#fff3e0 6px,#ffe9cc 6px,#ffe9cc 12px)}
+.srow.ak{box-shadow:inset -4px 0 0 #3b7dd8}
+.srow.lk.ud{box-shadow:inset 4px 0 0 #6b4fd8,inset -4px 0 0 #e07b00}
+.srow.lk.ak{box-shadow:inset 4px 0 0 #6b4fd8,inset -4px 0 0 #3b7dd8}
+.or input.qack{background:#e3edfb;box-shadow:inset 0 0 0 1px #3b7dd8;color:#1f4f99;font-weight:600}
+.or input.ubad{background:#ffe9cc;box-shadow:inset 0 0 0 1px #e07b00;font-weight:600}
+.ackok{color:#1f4f99;font-weight:600}
+.shdr{height:30px;display:flex;align-items:center;gap:8px;padding:0 10px;font-size:11.5px;font-weight:600;border-bottom:1px solid var(--border-strong)}
+.shdr.pin{background:#d9cff7;color:#3d2a99;position:sticky;top:0;z-index:2}
+.shdr.rst{background:#e4e9f2;color:var(--accent-strong)}
+.srow{grid-template-columns:104px 1fr 54px 44px 76px 140px 56px}
+.scols{display:grid;grid-template-columns:104px 1fr 54px 44px 76px 140px 56px;gap:0 6px;padding:0 10px;height:24px;align-items:center;background:#f0f2f6;border-bottom:1px solid var(--border-strong);font-size:11px;font-weight:600;color:var(--muted);flex:none}
+.uwarn{background:#ffe9cc;color:#b35f00;font-weight:700;border-radius:3px;padding:0 3px}
+.or input.qpos{outline:1px dashed var(--danger);outline-offset:-1px;background:#fff5f5}
+.acpop{position:fixed;z-index:90;width:600px;max-width:94vw;max-height:300px;overflow:auto;background:#fff;border:1px solid var(--border-strong);border-radius:4px;box-shadow:0 8px 24px rgba(20,30,60,.28);font-size:12px}
+.acpop .ai{display:grid;grid-template-columns:62px 110px 1fr 38px 90px;gap:6px;padding:5px 8px;border-bottom:1px solid #eceff3;cursor:pointer}
+.acpop .ai>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acpop .ai:hover,.acpop .ai.on{background:var(--accent-soft)}
+.acpop .ah{padding:5px 8px;color:var(--muted);font-size:11.5px;background:#fafbfc;position:sticky;top:0;border-bottom:1px solid var(--border)}
+/* ===== ветка «дерево»: заказная вместе с договорной и Excel ===== */
+#tvin{position:relative;min-width:1660px}
+.thead{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:640px 1fr;height:26px;background:#f0f2f6;border-bottom:1px solid var(--border-strong);font-size:11px;font-weight:600;color:var(--muted)}
+.thead .hl,.thead .hr{display:grid;align-items:center}
+.thead .hl{grid-template-columns:100px 1fr 46px 56px 128px;gap:0 6px;padding:0 8px 0 0;border-right:2px solid var(--border-strong);background:#e6eaf3;color:var(--accent-strong)}
+.thead .hl span:first-child{padding-left:8px}
+.thead .hr{grid-template-columns:26px 56px 70px 112px 100px minmax(200px,1fr) 50px 72px 130px 112px;gap:0 4px;padding:0 8px}
+#twin{position:absolute;left:0;right:0;top:26px}
+.tl{display:grid;grid-template-columns:640px 1fr;height:32px;border-bottom:1px solid #eceff3;background:#fff}
+.lc{display:grid;grid-template-columns:100px 1fr 46px 56px 128px;align-items:center;gap:0 6px;padding-right:8px;border-right:2px solid var(--border-strong);overflow:hidden;font-size:12.5px;background:#fff;min-width:0}
+.lc>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.lc .chev{border:0;background:none;width:18px;cursor:pointer;color:var(--muted);padding:0;flex:none}
+.lc .chev0{display:inline-block;width:18px;flex:none}
+.lc .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.lc .lm2{color:var(--muted);font-size:11.5px;font-weight:400;white-space:nowrap;flex:none}
+.lc.lg,.lc.lfree{display:flex;gap:6px;align-items:center;background:#e4e9f2;font-weight:600;color:var(--accent-strong);cursor:pointer}
+.lc.lg .lm,.lc.lfree .lm{margin-left:auto;font-weight:400;font-size:11.5px;color:var(--muted);white-space:nowrap}
+.lc.lp{background:#eef1f7;font-weight:500;cursor:pointer}
+.lc.lp.tg,.lc.lpad.tg{background:#fff3cf;box-shadow:inset 3px 0 0 var(--warning)}
+.lc.lp.dropping,.lc.lpad.dropping{outline:2px dashed var(--accent);outline-offset:-2px}
+.lc.lpad{background:#eef1f7;cursor:pointer}
+.lc.lpad2{background:repeating-linear-gradient(135deg,#f6f7fa,#f6f7fa 6px,#eef0f4 6px,#eef0f4 12px)}
+.lc.lx{background:#fafbfc;font-size:12px;color:#3d475a;cursor:pointer}
+.lc.lx.xs{background:#dbe6fb}
+.lc.lx.lk{background:#e8e1fb;box-shadow:inset 4px 0 0 #6b4fd8}
+.lc.lx.qd{box-shadow:inset -4px 0 0 var(--danger)}
+.lc.lx.ud{box-shadow:inset -4px 0 0 #e07b00;background:repeating-linear-gradient(135deg,#fff3e0,#fff3e0 6px,#ffe9cc 6px,#ffe9cc 12px)}
+.lc.lx.ak{box-shadow:inset -4px 0 0 #3b7dd8}
+.lc.lx.lk.qd{box-shadow:inset 4px 0 0 #6b4fd8,inset -4px 0 0 var(--danger)}
+.lc.lx.lk.ud{box-shadow:inset 4px 0 0 #6b4fd8,inset -4px 0 0 #e07b00}
+.lc .nocat{color:var(--danger)}
+.lc .lb{display:flex;gap:4px;align-items:center;justify-content:flex-end}
+button.chip{border:0;cursor:pointer;font-family:inherit}
+.rr{display:grid;grid-template-columns:26px 56px 70px 112px 100px minmax(200px,1fr) 50px 72px 130px 112px;gap:0 4px;align-items:center;padding:0 8px;font-size:12.5px;background:#fff;overflow:hidden;min-width:0}
+.rr input{width:100%;border:1px solid transparent;background:transparent;padding:3px 4px;border-radius:3px;min-width:0;font:inherit;font-size:12.5px;color:var(--text)}
+.rr input[type=checkbox]{width:auto}
+.rr input:hover{border-color:var(--border)}
+.rr input:focus{border-color:var(--accent);background:#fff;outline:none}
+.rr.sel{background:#dbe6fb}
+.rr.osel{outline:2px solid #6b4fd8;outline-offset:-2px;background:#f1edfd}
+.rr.rg{background:#f1f3f8;font-weight:600}
+.rr.rg input{font-weight:600}
+.rr.new{background:#fff1c9;box-shadow:inset 3px 0 0 var(--warning)}
+.rr.dropping{outline:2px dashed var(--accent);outline-offset:-2px;background:var(--accent-soft)}
+.rr.flash{animation:flsh 2.2s ease-out}
+@keyframes flsh{0%,60%{background:#c6f0d6}100%{background:inherit}}
+.rr .rn{display:flex;align-items:center;gap:1px;color:var(--faint);font-family:var(--mono);font-size:11.5px;cursor:grab;user-select:none;min-width:0}
+.rr .rn .chev{border:0;background:none;width:16px;cursor:pointer;color:var(--muted);padding:0}
+.rr .rn sup{color:var(--accent);margin-left:2px}
+.rr .ract{display:flex;justify-content:flex-end;gap:0}
+.rr input.qbad{background:var(--warning-soft);box-shadow:inset 0 0 0 1px var(--warning);color:var(--danger);font-weight:600}
+.rr input.qack{background:#e3edfb;box-shadow:inset 0 0 0 1px #3b7dd8;color:#1f4f99;font-weight:600}
+.rr input.ubad{background:#ffe9cc;box-shadow:inset 0 0 0 1px #e07b00;font-weight:600}
+.rc{display:flex;align-items:center;gap:10px;padding:0 10px;font-size:12px;color:var(--muted);background:#fff;overflow:hidden;white-space:nowrap}
+.rc.rub{background:#e4e9f2;color:var(--accent-strong);font-weight:600}
+.rc.rempty{background:#fcfcfd;font-style:italic}
+.dsrc{display:grid;grid-template-columns:110px 1fr 60px 56px 220px 60px;gap:6px;padding:3px 10px;font-size:12px;border-bottom:1px solid #eceff3;align-items:center}
+.dsrc>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#odet{max-height:170px;overflow:auto;background:#fff;border-bottom:1px solid var(--border)}
+.tb label.lbl2{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px}
+#oinfo,#odet,.tb{flex:none}
+#oinfo{flex-basis:auto}
+.tb{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:6px 10px;border-bottom:1px solid var(--border)}
+.rc.rcg{background:#e4e9f2;color:var(--accent-strong);font-weight:600;cursor:pointer;display:flex;gap:6px}
+.rc.rcg .chev{border:0;background:none;width:18px;cursor:pointer;color:var(--muted);padding:0}
+.rc.rcg .lm{margin-left:auto;font-weight:400;font-size:11.5px;color:var(--muted)}
+.rr.tgo{background:#fff8dc;box-shadow:inset 3px 0 0 var(--warning)}
+.rr.tgo.new{background:#fff1c9}
+.lc.lp.rel,.lc.lpad.rel{background:#ece6fb;box-shadow:inset 3px 0 0 #6b4fd8}
+.rr.tgo.sel{background:#dbe6fb}
+.lc.lp .lxi{display:block;padding:2px 4px 2px 8px;margin-left:-0px;cursor:pointer;border-radius:3px;overflow:hidden;text-overflow:ellipsis;font-weight:400;font-size:12px}
+.lc.lp .lxi.free{background:#fff3cf}
+.lc.lp .lxi.xs{background:#dbe6fb}
+.lc.lp .lxi.lk{background:#e8e1fb;box-shadow:inset 3px 0 0 #6b4fd8}
+.lc.lp .lxi.qd{box-shadow:inset -3px 0 0 var(--danger)}
+.lc.lp .lxi.ud{box-shadow:inset -3px 0 0 #e07b00}
+#cinfo{flex:none;flex-basis:auto}
+.tgc{flex:none;font-size:9.5px;font-weight:600;color:#3b5aa8;background:#e3ebfb;border:1px solid #b9c9ee;border-radius:3px;padding:0 4px;line-height:15px;text-transform:uppercase;letter-spacing:.2px}
+.lc.lg .tgc{background:#fff;}
+.lc.lp .nm{flex:1}
+button.chip.mk{background:#fff3cf;color:#8a5a00;cursor:pointer}
+.lc .ib.mkp{width:20px;padding:0;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;color:var(--accent-strong)}
+
+</style>
+</head>
+<body>
+
+<div class="top">
+  <h1>СЗС · Разметка спецификации</h1>
+  <span class="meta">АТС административного здания, ул. Промышленная 14 · Версия 1</span>
+  <div class="tabs">
+    <button class="tab on" data-tab="mark">① Договорная (продавец)</button>
+    <button class="tab" data-tab="eng">② Заказная: дерево</button>
+    <button class="tab" data-tab="prev">③ Вид договора</button>
+  </div>
+  <div class="sp"></div>
+  <div class="prog"><span id="stat">—</span><div class="bar"><i id="statBar"></i></div></div>
+</div>
+
+<!-- ============ TAB 1 ============ -->
+<main class="split" id="tab-mark">
+  <section class="pane" id="left">
+    <div class="ph"><b>Спецификация продавца (из Excel)</b><small id="lcount"></small><div class="sp"></div><button class="btn sm" data-full>⤢ На весь экран</button></div>
+    <div class="tb">
+      <input type="search" id="q" placeholder="Поиск: артикул, наименование, производитель…">
+      <select id="flt">
+        <option value="all">Все строки</option>
+        <option value="free">Без связи с договорной</option>
+        <option value="linked">Со связью</option>
+        <option value="target">Связанные с выбранной справа</option>
+      </select>
+      <button class="btn" id="selFound">Выделить все найденные</button>
+    </div>
+    <div class="cols"><span></span><span>№</span><span>Артикул</span><span>Произв.</span><span>Наименование</span><span>Ед.</span><span>Кол-во</span><span>Связи</span></div>
+    <div class="vl" id="vl"><div id="vsp"></div><div id="vwin"></div></div>
+    <div class="hint">Клик — выделить · Shift+клик — диапазон · клик по разделу — весь раздел · перетащите выделение на позицию справа</div>
+    <div class="selbar hidden" id="selbar">
+      <span><b id="selN">0</b> выделено</span>
+      <button class="btn pr" data-a="new">＋ Новая позиция из выделенного</button>
+      <button class="btn" data-a="intoT" id="bInto">→ В выбранную</button>
+      <button class="btn" data-a="each">Каждая строка — своя позиция</button>
+      <button class="btn" data-a="unT" id="bUn">Отвязать от выбранной</button>
+      <button class="btn gh" data-a="clr">✕</button>
+    </div>
+  </section>
+
+  <section class="pane" id="right">
+    <div class="ph"><b>Договорная спецификация</b><small id="rcount"></small><div class="sp"></div>
+      <button class="btn sm" data-r="addg">＋ Группа</button>
+      <button class="btn sm" data-r="addp">＋ Позиция</button>
+      <button class="btn sm" data-r="auto">⚡ Авто…</button><button class="btn sm" data-full>⤢</button>
+    </div>
+    <div class="tree" id="tree"></div>
+    <div class="hint">Строка договорной = связь с N строками Excel. 👁 — не показывать состав / строку в договоре (входит в итог). Клик по строке — «цель» для кнопки «→ В выбранную».</div>
+  </section>
+</main>
+
+<!-- ============ TAB 2 (ветка «дерево») ============ -->
+<main class="hidden" id="tab-eng" style="flex:1;display:flex;flex-direction:column;min-height:0">
+  <section class="pane" style="margin:10px;flex:1">
+    <div class="ph"><b>Заказная спецификация — вместе с договорной и Excel</b><small id="tmeta"></small><div class="sp"></div>
+      <button class="btn sm" data-cmd="csv">⬇ Заказная (CSV)</button><button class="btn sm" data-cmd="csvnew">⬇ Новые для 1С (CSV)</button><button class="btn sm" data-full>⤢ На весь экран</button></div>
+    <div class="tb">
+      <select id="tMode" title="Что показывать в договорной части"><option value="all">Договорная: все строки (позиции + их строки Excel)</option><option value="pos">Договорная: только договорные строки</option></select>
+      <select id="tFlt" title="Фильтр блоков"><option value="all">Все блоки</option><option value="issues">С расхождениями</option><option value="new">С новыми (нет в 1С)</option><option value="rest">С необработанным Excel</option><option value="empty">Без заказных</option><option value="nolink">Только заказные без договора</option></select>
+      <input type="search" id="tQ" placeholder="Поиск: договорная, Excel, заказная…" style="max-width:260px">
+      <button class="btn sm" data-cmd="expand">Развернуть всё</button><button class="btn sm" data-cmd="collapse">Свернуть всё</button>
+      <button class="btn sm" data-cmd="pickn" title="Выделить заказные по номерам, например 1-5, 60-70">№…</button>
+      <button class="btn sm" data-cmd="addrow">＋ Строка</button>
+      <button class="btn sm" data-cmd="autolink" title="Связать заказные строки с договорными позициями по тому, где лежат их строки Excel">⚡ Связать по Excel</button>
+      <button class="btn sm" data-cmd="prefill" title="Добавить заказные строки для строк Excel, найденных в 1С по артикулу и ещё не использованных">↻ Дозаполнить по артикулам</button>
+      <button class="btn sm" data-cmd="ackdoc">Согласовать все расхождения…</button>
+      <button class="btn sm" data-cmd="demo" title="Собрать пример договорной: одна группа из 15 строк">Пример договорной</button>
+      <span id="tIss" style="color:var(--danger);font-weight:600"></span>
+    </div>
+    <div class="bindbar hidden" id="cinfo" style="background:#fff3cf;border-color:#e0c46b;border-radius:0;margin:0"></div>
+    <div class="bindbar hidden" id="oinfo" style="background:#ece6fb;border-color:#b8a7ee;border-radius:0;margin:0"></div>
+    <div id="odet" class="hidden"></div>
+    <div class="vl" id="tv"><div id="tvin">
+      <div class="thead">
+        <div class="hl"><span>Артикул Excel</span><span>Наименование</span><span>Ед.</span><span style="text-align:right">Кол-во</span><span>Статус</span></div>
+        <div class="hr"><span></span><span>№</span><span>Код 1С</span><span>Артикул</span><span>Произв.</span><span>Наименование</span><span>Ед.</span><span>Кол-во</span><span>Комментарий</span><span></span></div>
+      </div>
+      <div id="tsp"></div><div id="twin"></div>
+    </div></div>
+    <div class="selbar hidden" id="tbar"></div>
+    <div class="hint">Слева — договорная (группы → позиции → строки Excel), справа — заказная; строки выровнены, прокручиваются вместе. Клик по позиции договора — «цель»; выделите заказные строки (№ / Shift) и свяжите — они переедут к позиции. Группа в заказной связана с позицией договора вместе со всем содержимым.</div>
+  </section>
+</main>
+
+
+<!-- ============ TAB 3 ============ -->
+<main class="hidden" id="tab-prev" style="flex:1;display:flex;flex-direction:column;min-height:0">
+  <div class="pv" id="pv"></div>
+</main>
+
+<div id="acpop" class="acpop hidden"></div>
+<div id="toast"></div>
+
+
+<script>
+/* ===================== DATA GENERATION (демо: 50 000 строк) ===================== */
+const ROW_H=30;
+const SEC=['Оповещение и связь','Кабельная продукция','Коммутация','Электроустановочные изделия','Щитовое оборудование','Крепёж и метизы','Лотки и короба','Структурированные кабельные системы','Видеонаблюдение','СКУД','Пожарная сигнализация','Источники питания','Серверное оборудование','Активное сетевое оборудование','Пассивное оборудование','Монтажные материалы','Заземление','Освещение','Датчики','Громкоговорители','Усилители','Пульты','Аккумуляторы','Шкафы и стойки','Расходные материалы'];
+const T=[['KPS','Кабель КПСЭнг(A)-FRLS 2х2х0,5','м','ИЭК'],['KOR','Короб пластиковый кабельный','м','DKC'],['AVT','Автоматический выключатель','шт.','ABB'],['RZT','Розетка накладная','шт.','Legrand'],['GRM','Громкоговоритель рупорный AR','шт.','Армтел ООО'],['NCU','Модуль контроля линий NCU','шт.','Армтел ООО'],['TDA','Усилитель мощности TDA','шт.','Армтел ООО'],['PTC','Патч-корд UTP cat.6','шт.','Hyperline'],['SWT','Коммутатор управляемый','шт.','Eltex'],['CAM','IP-камера купольная','шт.','Hikvision'],['DTC','Датчик дымовой','шт.','Болид'],['BPT','Блок питания 12В','шт.','Рубикон'],['AKB','Аккумулятор 12В','шт.','Delta'],['LTK','Лоток перфорированный','м','DKC'],['DUB','Дюбель-гвоздь','шт.','Fischer'],['SHK','Шкаф телекоммуникационный','шт.','ЦМО'],['SVT','Светильник аварийный','шт.','Varton'],['ZZM','Шина заземления','шт.','ИЭК'],['RLE','Модуль реле NCU-REL','шт.','Армтел ООО'],['PLT','Пульт диспетчерский TOP-DIS','шт.','Армтел ООО']];
+const norm=s=>String(s||'').replace(/\s+/g,'').toUpperCase();
+const S={tab:'mark',rows:[],secs:[],roots:[],sel:new Set(),anchor:-1,filter:'all',q:'',view:[],target:null,exp:new Set(),eng:null,eq:'',efree:false};
+const idx=new Map(); let NID=0, OID=0;
+const catalog=new Map(); let catArr=[];
+
+(function gen(){
+  let code=10000;
+  T.forEach(t=>{for(let v=0;v<250;v++){ if((v*7+t[0].charCodeAt(0))%4===0)continue;
+    const it={code:String(code++),art:t[0]+'-'+(1000+v),manuf:t[3],name:t[1]+' тип '+v,unit:t[2]}; catalog.set(norm(it.art),it);} });
+  catArr=[...catalog.values()];
+  SEC.forEach((n,i)=>S.secs.push({id:i,name:n,rows:[]}));
+  const N=50000,per=2000;
+  for(let i=0;i<N;i++){
+    const s=(i/per)|0,k=i%8,v=(i>>3)%250,t=T[(s*3+k)%20];
+    let art=t[0]+'-'+(1000+v), manuf=t[3], name=t[1]+' тип '+v+(i%11===0?' (замена)':'');
+    let dirty=false;
+    if(i%23===0){art=art.toLowerCase()+' ';dirty=true}
+    if(i%37===0){art='';dirty=true}
+    if(i%29===0){manuf='';dirty=true}
+    const qty=(1+(i*13)%40)*(t[2]==='м'?10:1);
+    const r={id:i,sec:s,n:i+1,art,manuf,name,unit:t[2],qty,links:[],dirty,s:(art+' '+name+' '+manuf).toLowerCase()};
+    S.rows.push(r);S.secs[s].rows.push(r);
+  }
+})();
+
+/* ===================== HELPERS ===================== */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(()=>t.classList.remove('show'),2400)}
+const fmt=n=>n.toLocaleString('ru-RU');
+function sub(n,set){set.add(n.id);n.ch.forEach(c=>sub(c,set))}
+function cntRec(n){let c=n.rows.length;for(const k of n.ch)c+=cntRec(k);return c}
+function mkNode(o){return Object.assign({id:'n'+(++NID),kind:'p',name:'',unit:'шт.',qty:1,rows:[],ch:[],hidden:false,hideKids:false,orders:[],p:null,strict:false},o)}
+function addChild(parent,n){if(parent){n.p=parent.id;parent.ch.push(n);S.exp.add(parent.id)}else{n.p=null;S.roots.push(n)}idx.set(n.id,n);return n}
+function linkRows(n,ids){let c=0;for(const id of ids){const r=S.rows[id];if(!r.links.includes(n.id)){r.links.push(n.id);n.rows.push(id);c++}}return c}
+function unlinkRows(n,ids){const s=new Set(ids);n.rows=n.rows.filter(id=>!s.has(id));ids.forEach(id=>{const r=S.rows[id];r.links=r.links.filter(x=>x!==n.id)})}
+function removeNode(n){n.ch.slice().forEach(removeNode);unlinkRows(n,n.rows.slice());idx.delete(n.id);const arr=n.p?idx.get(n.p).ch:S.roots;arr.splice(arr.indexOf(n),1);if(S.target===n.id)S.target=null}
+function insertParent(){const tn=idx.get(S.target);if(!tn)return null;return tn.kind==='g'?tn:(idx.get(tn.p)||null)}
+function resetAll(){S.rows.forEach(r=>r.links=[]);S.roots=[];idx.clear();S.exp.clear();S.target=null;S.sel.clear()}
+
+/* ===================== STATS ===================== */
+function updateStats(){
+  let a=0;for(const r of S.rows)if(r.links.length)a++;
+  const N=S.rows.length;
+  $('stat').textContent=`Распределено ${fmt(a)} из ${fmt(N)} строк · без связи: ${fmt(N-a)}`;
+  $('statBar').style.width=(a/N*100)+'%';
+  $('rcount').textContent=idx.size?`${fmt(idx.size)} поз.`:'';
+}
+
+/* ===================== LEFT: virtual list ===================== */
+function refreshView(){
+  const q=S.q.trim().toLowerCase();let ts=null;
+  if(S.filter==='target'&&S.target&&idx.get(S.target)){ts=new Set();sub(idx.get(S.target),ts)}
+  const out=[];
+  for(const sec of S.secs){
+    const st=out.length;out.push({t:'s',sec,cnt:0});let c=0;
+    for(const r of sec.rows){
+      if(q&&!r.s.includes(q))continue;
+      if(S.filter==='free'&&r.links.length)continue;
+      if(S.filter==='linked'&&!r.links.length)continue;
+      if(S.filter==='target'&&!(ts&&r.links.some(l=>ts.has(l))))continue;
+      out.push({t:'r',r});c++;
+    }
+    if(!c)out.length=st;else out[st].cnt=c;
+  }
+  S.view=out;
+  $('vsp').style.height=out.length*ROW_H+'px';
+  const n=out.filter(x=>x.t==='r').length;
+  $('lcount').textContent=`показано ${fmt(n)} строк`;
+  renderVL();
+}
+function renderVL(){
+  const vl=$('vl'),st=vl.scrollTop,h=vl.clientHeight||600;
+  const a=Math.max(0,Math.floor(st/ROW_H)-8),b=Math.min(S.view.length,Math.ceil((st+h)/ROW_H)+8);
+  let html='';
+  for(let i=a;i<b;i++){
+    const it=S.view[i];
+    if(it.t==='s'){
+      let done=0,sel=0;for(const r of it.sec.rows){if(r.links.length)done++;if(S.sel.has(r.id))sel++}
+      html+=`<div class="vr sec" data-i="${i}"><input type="checkbox" tabindex="-1" ${sel&&sel===it.sec.rows.length?'checked':''}><b>${esc(it.sec.name)}</b><span>${fmt(it.cnt)} строк</span><span>распределено ${fmt(done)} / ${fmt(it.sec.rows.length)}</span></div>`;
+    }else{
+      const r=it.r,l=r.links.length;
+      html+=`<div class="vr r ${S.sel.has(r.id)?'sel':''}" data-i="${i}" draggable="true">
+        <input type="checkbox" tabindex="-1" ${S.sel.has(r.id)?'checked':''}>
+        <span class="mono" style="color:var(--faint)">${r.n}</span>
+        <span class="mono ${r.art&&r.art!==r.art.trim()||/[a-z]/.test(r.art)?'':''}">${r.art?(r.dirty&&r.art!==r.art.toUpperCase().trim()?`<span class="dirty" title="Нестандартный формат">${esc(r.art)}</span>`:esc(r.art)):'<span class="dirty">нет</span>'}</span>
+        <span>${r.manuf?esc(r.manuf):'<span class="dirty">нет</span>'}</span>
+        <span title="${esc(r.name)}">${esc(r.name)}</span><span>${esc(r.unit)}</span><span class="mono" style="text-align:right">${r.qty}</span>
+        <span class="chip ${l===0?'no':l>1?'multi':'ok'}">${l===0?'—':l>1?l+' поз.':'✓'}</span></div>`;
+    }
+  }
+  $('vwin').style.transform=`translateY(${a*ROW_H}px)`;
+  $('vwin').innerHTML=html;
+}
+$('vl').addEventListener('scroll',renderVL);
+window.addEventListener('resize',renderVL);
+$('vl').addEventListener('click',e=>{
+  const row=e.target.closest('.vr');if(!row)return;
+  const i=+row.dataset.i,it=S.view[i];
+  if(it.t==='s'){
+    const ids=[];for(let j=i+1;j<S.view.length&&S.view[j].t==='r';j++)ids.push(S.view[j].r.id);
+    const all=ids.every(id=>S.sel.has(id));ids.forEach(id=>all?S.sel.delete(id):S.sel.add(id));
+  }else if(e.shiftKey&&S.anchor>=0){
+    const a=Math.min(S.anchor,i),b=Math.max(S.anchor,i);
+    for(let j=a;j<=b;j++)if(S.view[j].t==='r')S.sel.add(S.view[j].r.id);
+  }else{
+    const id=it.r.id;S.sel.has(id)?S.sel.delete(id):S.sel.add(id);S.anchor=i;
+  }
+  renderVL();updateSelbar();
+});
+$('vl').addEventListener('dragstart',e=>{
+  const row=e.target.closest('.vr.r');if(!row)return;
+  const r=S.view[+row.dataset.i].r;
+  if(!S.sel.has(r.id)){S.sel.clear();S.sel.add(r.id)}
+  e.dataTransfer.setData('text/plain','rows');e.dataTransfer.effectAllowed='copy';
+  const g=document.createElement('div');g.textContent=`${S.sel.size} строк → договорная`;
+  g.style.cssText='position:absolute;top:-100px;padding:6px 10px;background:#1f2f4d;color:#fff;border-radius:4px;font:12px sans-serif';
+  document.body.appendChild(g);e.dataTransfer.setDragImage(g,10,10);setTimeout(()=>g.remove(),0);
+});
+$('vl').addEventListener('dragend',()=>{renderVL();updateSelbar()});
+$('q').addEventListener('input',e=>{S.q=e.target.value;refreshView()});
+$('flt').addEventListener('change',e=>{S.filter=e.target.value;refreshView()});
+$('selFound').addEventListener('click',()=>{S.view.forEach(x=>{if(x.t==='r')S.sel.add(x.r.id)});renderVL();updateSelbar();toast(`Выделено строк: ${fmt(S.sel.size)}`)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.sel.size){S.sel.clear();renderVL();updateSelbar()}});
+
+function updateSelbar(){
+  const n=S.sel.size;$('selbar').classList.toggle('hidden',!n);$('selN').textContent=fmt(n);
+  const tn=idx.get(S.target);
+  $('bInto').classList.toggle('hidden',!tn);$('bUn').classList.toggle('hidden',!tn);
+  if(tn){const nm=tn.name.length>28?tn.name.slice(0,28)+'…':tn.name;$('bInto').textContent=`→ В «${nm}»`;$('bUn').textContent='Отвязать от выбранной'}
+}
+$('selbar').addEventListener('click',e=>{
+  const a=e.target.closest('[data-a]');if(!a)return;
+  const ids=[...S.sel],act=a.dataset.a,tn=idx.get(S.target);
+  if(act==='clr'){S.sel.clear()}
+  else if(act==='new'){newPos(ids)}
+  else if(act==='each'){
+    if(ids.length>3000&&!confirm(`Будет создано ${ids.length} позиций. Продолжить?`))return;
+    const par=insertParent();let last=null;
+    ids.forEach(id=>{const r=S.rows[id];last=addChild(par,mkNode({name:r.name||'(без наименования)',unit:r.unit,qty:r.qty,strict:true}));linkRows(last,[id])});
+    toast(`Создано позиций: ${ids.length}`);S.sel.clear();
+  }
+  else if(act==='intoT'&&tn){const c=linkRows(tn,ids);toast(`Связано ${c} строк → «${tn.name}»`);S.sel.clear()}
+  else if(act==='unT'&&tn){unlinkRows(tn,ids);toast('Связи сняты');S.sel.clear()}
+  afterChange();
+});
+function newPos(ids){
+  const rows=ids.map(i=>S.rows[i]);
+  const secs=new Set(rows.map(r=>r.sec)),units=new Set(rows.map(r=>r.unit));
+  let name,unit,qty,strict=false;
+  if(rows.length===1){name=rows[0].name;unit=rows[0].unit;qty=rows[0].qty;strict=true}
+  else{
+    name=(secs.size===1?S.secs[rows[0].sec].name:rows[0].name+' и др.')+` (${rows.length} поз.)`;
+    if(units.size===1){unit=rows[0].unit;qty=rows.reduce((s,r)=>s+r.qty,0)}else{unit='компл.';qty=1}
+  }
+  const n=addChild(insertParent(),mkNode({name,unit,qty,strict}));
+  linkRows(n,ids);S.sel.clear();S.target=n.id;afterChange();
+  const inp=document.querySelector(`.nd[data-id="${n.id}"] .nm`);
+  if(inp){inp.scrollIntoView({block:'center'});inp.focus();inp.select()}
+  toast('Позиция создана — переименуйте её при необходимости');
+}
+function afterChange(){renderTree();updateSelbar();updateStats();refreshView()}
+
+/* ===================== RIGHT: contract tree ===================== */
+function nodeHTML(n,d){
+  const kids=n.ch.length,open=S.exp.has(n.id),cnt=cntRec(n);
+  let h=`<div class="nd ${S.target===n.id?'tg':''} ${n.hidden?'dim':''}" data-id="${n.id}" style="padding-left:${6+d*18}px">
+    <button class="chev" data-a="tog">${kids?(open?'▾':'▸'):'·'}</button>
+    <span class="ico">${kids||n.kind==='g'?'▤':'▪'}</span>
+    <input class="nm" data-f="name" value="${esc(n.name)}" placeholder="Наименование в договоре">`;
+  if(!kids)h+=`<input class="un" data-f="unit" value="${esc(n.unit)}"><input class="qt" data-f="qty" type="number" value="${n.qty}">`;
+  h+=`<span class="bd ${cnt?'ok':'no'}" title="Связано строк Excel">🔗 ${fmt(cnt)}</span>
+    <button class="ib ${(kids?n.hideKids:n.hidden)?'on':''}" data-a="eye" title="${kids?'Не показывать состав группы в договоре':'Не выводить строку в договор (входит в итог группы)'}">${(kids?n.hideKids:n.hidden)?'🚫':'👁'}</button>
+    <button class="ib" data-a="addc" title="Добавить вложенную позицию">＋</button>
+    <button class="ib dn" data-a="del" title="Удалить">✕</button></div>`;
+  if(kids&&open)for(const c of n.ch)h+=nodeHTML(c,d+1);
+  return h;
+}
+function renderTree(){
+  const t=$('tree');
+  if(!S.roots.length){
+    t.innerHTML=`<div class="empty"><h3>Договорная спецификация пуста</h3>
+      Соберите её из спецификации продавца слева. Быстрые способы:
+      <div class="cards">
+        <button class="card" data-r="mirror"><b>Зеркально</b><span>Группа на каждый раздел Excel, 1 строка Excel → 1 позиция. Дальше — склеить и скрыть лишнее.</span></button>
+        <button class="card" data-r="sections"><b>Только разделы</b><span>В договоре — только группы, весь состав раздела связан с группой и скрыт.</span></button>
+        <button class="card" data-r="hint"><b>Вручную</b><span>Выделите строки слева (поиск → «Выделить все найденные», раздел целиком, Shift-диапазон) и нажмите «Новая позиция» или перетащите на существующую.</span></button>
+      </div></div>`;return;
+  }
+  t.innerHTML=S.roots.map(n=>nodeHTML(n,0)).join('');
+}
+const tree=$('tree');
+function setTarget(id){
+  S.target=id;tree.querySelectorAll('.nd').forEach(e=>e.classList.toggle('tg',e.dataset.id===id));
+  updateSelbar();if(S.filter==='target')refreshView();
+}
+tree.addEventListener('click',e=>{
+  const r=e.target.closest('[data-r]');if(r){rightAction(r.dataset.r);return}
+  const row=e.target.closest('.nd');if(!row)return;
+  const n=idx.get(row.dataset.id),a=e.target.closest('[data-a]');
+  if(a){
+    const act=a.dataset.a;
+    if(act==='tog'){S.exp.has(n.id)?S.exp.delete(n.id):S.exp.add(n.id);renderTree()}
+    else if(act==='eye'){n.ch.length?n.hideKids=!n.hideKids:n.hidden=!n.hidden;renderTree()}
+    else if(act==='addc'){n.kind='g';const c=addChild(n,mkNode({name:'Новая позиция'}));S.target=c.id;renderTree();updateStats();const i=document.querySelector(`.nd[data-id="${c.id}"] .nm`);i&&(i.focus(),i.select())}
+    else if(act==='del'){if(cntRec(n)&&!confirm(`Удалить «${n.name}»? Будет снято связей: ${cntRec(n)}`))return;removeNode(n);afterChange()}
+    return;
+  }
+  if(e.target.tagName!=='INPUT')setTarget(n.id);
+});
+tree.addEventListener('focusin',e=>{const row=e.target.closest('.nd');if(row&&e.target.tagName==='INPUT'&&S.target!==row.dataset.id)setTarget(row.dataset.id)});
+tree.addEventListener('input',e=>{
+  const row=e.target.closest('.nd'),f=e.target.dataset.f;if(!row||!f)return;
+  const n=idx.get(row.dataset.id);n[f]=f==='qty'?Number(e.target.value):e.target.value;
+  if(f==='name')updateSelbar();
+});
+tree.addEventListener('dragover',e=>{const r=e.target.closest('.nd');if(r){e.preventDefault();r.classList.add('dropping')}});
+tree.addEventListener('dragleave',e=>{const r=e.target.closest('.nd');r&&r.classList.remove('dropping')});
+tree.addEventListener('drop',e=>{
+  e.preventDefault();const r=e.target.closest('.nd');if(!r)return;r.classList.remove('dropping');
+  const n=idx.get(r.dataset.id),c=linkRows(n,[...S.sel]);toast(`Связано ${c} строк → «${n.name}»`);S.sel.clear();S.target=n.id;afterChange();
+});
+document.querySelector('#right .ph').addEventListener('click',e=>{const b=e.target.closest('[data-r]');b&&rightAction(b.dataset.r)});
+function rightAction(a){
+  if(a==='addg'){const g=addChild(insertParent(),mkNode({kind:'g',name:'Новая группа'}));S.target=g.id;renderTree();updateStats();const i=document.querySelector(`.nd[data-id="${g.id}"] .nm`);i&&(i.focus(),i.select())}
+  else if(a==='addp'){const p=addChild(insertParent(),mkNode({name:'Новая позиция'}));S.target=p.id;renderTree();updateStats();const i=document.querySelector(`.nd[data-id="${p.id}"] .nm`);i&&(i.focus(),i.select())}
+  else if(a==='auto'){if(!S.roots.length){toast('Выберите способ в центре панели');return}
+    if(confirm('Перестроить договорную заново? Текущие связи будут сброшены.')){resetAll();afterChange()}}
+  else if(a==='mirror'){
+    resetAll();
+    S.secs.forEach(sec=>{const g=addChild(null,mkNode({kind:'g',name:sec.name}));S.exp.delete(g.id);
+      sec.rows.forEach(r=>{const n=addChild(g,mkNode({name:r.name||'(без наименования)',unit:r.unit,qty:r.qty,strict:true}));linkRows(n,[r.id])});S.exp.delete(g.id)});
+    afterChange();toast('Создано зеркально: группы по разделам, 1 строка → 1 позиция');
+  }
+  else if(a==='sections'){
+    resetAll();
+    S.secs.forEach(sec=>{const g=addChild(null,mkNode({kind:'g',name:sec.name,unit:'компл.',qty:1}));linkRows(g,sec.rows.map(r=>r.id))});
+    afterChange();toast('Созданы группы по разделам — состав скрыт внутри групп');
+  }
+  else if(a==='hint'){toast('Выделяйте строки слева → «Новая позиция из выделенного»')}
+}
+
+/* ===================== TAB 2 (ветка «дерево»): заказная вместе с договорной и Excel ===================== */
+const LH=32;
+const TR={O:null,OM:new Map(),seq:0,mode:'all',cc:new Set(),xo:new Map(),oc:new Set(),sel:new Set(),exSel:new Set(),tgC:null,selO:null,selSrc:new Set(),
+  q:'',flt:'all',lines:[],terms:[],byCp:new Map(),kids:new Map(),exMap:new Map(),exFree:[],lineOf:new Map(),exLine:new Map(),num:[],
+  flash:new Set(),bm:new Map(),det:false,freeOpen:false,ac:null,anchor:-1,noFocus:false};
+
+/* ---------- единицы измерения, суммы и контроли (сверка только со строками Excel) ---------- */
+const UALIAS={'шт':'шт','штука':'шт','штук':'шт','pcs':'шт','м':'м','метр':'м','метров':'м','мп':'м','пм':'м','компл':'компл','комплект':'компл','кт':'компл','уп':'уп','упак':'уп','упаковка':'уп','кг':'кг','килограмм':'кг','л':'л','литр':'л'};
+function uNorm(u){const k=String(u||'').toLowerCase().replace(/[\s.]/g,'');return UALIAS[k]||k}
+function unitDiff(r,o){const a=uNorm(r.unit),b=uNorm(o.unit);return !!a&&!!b&&a!==b}
+function srcRows(o){return o.src.map(id=>S.rows[id])}
+function srcSum(o){let s=0;for(const id of o.src)s+=S.rows[id].qty;return s}            /* Σ по ВСЕМ связанным строкам Excel, единицы не учитываются */
+function srcDiffRows(o){return srcRows(o).filter(r=>unitDiff(r,o))}
+/* количество группы — множитель состава: при проверке количества вложенных строк оно умножается; в самих строках количество — на одну группу */
+function mult(o){let m=1;while(o.par){o=TR.OM.get(o.par);if(!o)break;if(o.kind==='g')m*=(+o.qty||0)}return m}
+function effQty(o){return Math.round((+o.qty||0)*mult(o)*1e6)/1e6}
+/* строки без связи с Excel сверяются по позиции договора: Σ заказных (с множителями групп) ↔ Σ строк Excel позиции (нет строк Excel — количество позиции) */
+function blkInfo(cpId){let m=TR.bm.get(cpId);if(m)return m;const n=idx.get(cpId);let ord=0,has=false;
+  for(const o of allIn(TR.byCp.get(cpId)||[],[])){if(o.kind==='g')continue;ord+=effQty(o);if(!o.src.length)has=true}
+  ord=Math.round(ord*1e6)/1e6;
+  const hasEx=!!(n&&n.rows.length),ex=hasEx?n.rows.reduce((a,id)=>a+S.rows[id].qty,0):(n?n.qty:0);
+  m={ord,ex,has,hasEx};TR.bm.set(cpId,m);return m}
+function blkOf(o){if(o.kind==='g'||o.src.length)return null;const c=cpOf(o);return c?blkInfo(c):null}
+function blkBad(o){const b=blkOf(o);return !!b&&Math.abs(b.ord-b.ex)>1e-9}
+function qtyBad(o){if(o.kind==='g')return false;return o.src.length>0?Math.abs(effQty(o)-srcSum(o))>1e-9:blkBad(o)}
+function unitBad(o){return o.kind!=='g'&&o.src.length>0&&srcDiffRows(o).length>0}
+function oSig(o){const b=blkOf(o);return effQty(o)+'|'+srcSum(o)+'|'+(b?b.ord+'/'+b.ex:'')+'|'+srcDiffRows(o).length+'|'+o.unit}
+function ackValid(o){return !!o.ack&&o.ack.sig===oSig(o)}
+function oRaw(o){return qtyBad(o)||unitBad(o)}
+function qOpen(o){return oRaw(o)&&!ackValid(o)}
+function qCls(o){return qtyBad(o)?(ackValid(o)?'qack':'qbad'):''}
+function gqCls(g){let bad=false,ack=false;for(const x of allIn(kidsOf(g),[])){if(qtyBad(x)){if(ackValid(x))ack=true;else bad=true}}return bad?'qbad':(ack?'qack':'')}
+function uCls(o){return unitBad(o)&&!ackValid(o)?'ubad':''}
+function qtyTip(o){const t=[];
+  if(qtyBad(o)&&!o.src.length){const b=blkOf(o);t.push('Σ заказных по позиции договора (с учётом множителей групп) = '+b.ord+', '+(b.hasEx?'Σ строк Excel позиции':'количество в договоре')+' = '+b.ex+' (Δ '+(b.ord-b.ex>0?'+':'')+Math.round((b.ord-b.ex)*1e6)/1e6+')')}
+  else if(qtyBad(o)){const m=mult(o),d=effQty(o)-srcSum(o);t.push('Σ связанных строк Excel = '+srcSum(o)+', в заказной '+(m!==1?o.qty+' × '+m+' (множитель групп) = '+effQty(o):o.qty)+' (Δ '+(d>0?'+':'')+d+')')}
+  if(unitBad(o))t.push('Другая ед. изм. у '+srcDiffRows(o).length+' строк Excel');
+  if(ackValid(o)&&oRaw(o))t.push('✓ согласовано: '+o.ack.text);
+  return t.join(' · ')}
+function askAck(label){const t=prompt(label,'');return t&&t.trim()?t.trim():null}
+
+/* ---------- справочник 1С: быстрый поиск ---------- */
+function catIdx(){if(catArr._i)return;catArr.forEach(it=>{it._s=(it.art+' '+it.name+' '+it.manuf+' '+it.code).toLowerCase()});catArr._i=1}
+function catFind(q,lim){catIdx();q=q.trim().toLowerCase();if(!q)return catArr.slice(0,lim);
+  const tk=q.split(/\s+/),a=[],b=[];
+  for(const it of catArr){let ok=true;for(const t of tk)if(!it._s.includes(t)){ok=false;break}
+    if(!ok)continue;(it.art.toLowerCase().startsWith(tk[0])?a:b).push(it);if(a.length>=lim)break}
+  return a.concat(b).slice(0,lim)}
+
+/* ---------- модель: заказные строки (одна глобальная спецификация) ---------- */
+function mkO(p){const o=Object.assign({id:'o'+(++OID),kind:'p',par:null,cp:null,code:'',art:'',manuf:'',name:'',unit:'шт.',qty:1,comment:'',src:[],isNew:false,seq:++TR.seq},p);TR.O.push(o);TR.OM.set(o.id,o);return o}
+function orderFromRow(r,extra){const it=catalog.get(norm(r.art));
+  return it?Object.assign({code:it.code,art:it.art,manuf:it.manuf,name:it.name,unit:it.unit,qty:r.qty,src:[r.id],seq:r.id+1},extra||{})
+           :Object.assign({isNew:true,art:r.art.trim(),manuf:r.manuf,name:r.name,unit:r.unit,qty:r.qty,src:[r.id],seq:r.id+1},extra||{})}
+function prefill(){
+  if(TR.O)return 0;TR.O=[];TR.OM=new Map();TR.seq=0;let c=0;
+  for(const r of S.rows){if(!catalog.has(norm(r.art)))continue;mkO(orderFromRow(r));c++}
+  TR.seq=S.rows.length+1;return c}
+function prefillMore(){let c=0,miss=0;for(const r of S.rows){if(TR.exMap.has(r.id))continue;if(!catalog.has(norm(r.art))){miss++;continue}mkO(orderFromRow(r));c++}return{c,miss}}
+function validate(){if(!TR.O)return;for(const o of TR.O){if(o.cp){const n=idx.get(o.cp);if(!n||n.ch.length)o.cp=null}if(o.par&&!TR.OM.has(o.par))o.par=null}}
+function topOf(o){while(o.par){const p=TR.OM.get(o.par);if(!p)break;o=p}return o}
+function cpOf(o){return topOf(o).cp||null}
+function isAnc(a,o){while(o&&o.par){if(o.par===a.id)return true;o=TR.OM.get(o.par)}return false}   /* a — предок o */
+function kidsOf(o){return TR.kids.get(o.id)||[]}
+function cntKids(o){let c=0;for(const x of kidsOf(o)){c++;c+=cntKids(x)}return c}
+function subSome(o,pred){if(pred(o))return true;for(const x of kidsOf(o))if(subSome(x,pred))return true;return false}
+function flat(list,d,out){for(const o of list){out.push({o,d});if(o.kind==='g'&&!TR.oc.has(o.id)){const k=TR.kids.get(o.id);if(k)flat(k,d+1,out)}}return out}
+function allIn(list,out){for(const o of list){out.push(o);const k=TR.kids.get(o.id);if(k)allIn(k,out)}return out}
+
+function rebuild(){
+  const kids=new Map(),by=new Map(),ex=new Map();
+  if(TR.O)for(const o of TR.O){
+    if(o.par&&TR.OM.has(o.par)){let a=kids.get(o.par);if(!a)kids.set(o.par,a=[]);a.push(o)}
+    else{o.par=null;const k=o.cp||'_';let a=by.get(k);if(!a)by.set(k,a=[]);a.push(o)}
+    for(const id of o.src){let a=ex.get(id);if(!a)ex.set(id,a=[]);a.push(o)}
+  }
+  const cmp=(a,b)=>a.seq-b.seq;by.forEach(a=>a.sort(cmp));kids.forEach(a=>a.sort(cmp));
+  TR.byCp=by;TR.kids=kids;TR.exMap=ex;
+  TR.terms=[];(function w(ns){for(const n of ns){if(n.ch.length)w(n.ch);else TR.terms.push(n)}})(S.roots);
+  TR.exFree=[];for(const r of S.rows)if(!r.links.length)TR.exFree.push(r.id);
+}
+function xOpen(n){const v=TR.xo.get(n.id);return v===undefined?true:v}
+function inl(n){return TR.mode==='all'&&n.rows.length===1}   /* единственная строка Excel позиции показывается в той же строке, без дубля */
+function gStats(n){let pos=0,ord=0,iss=0;
+  (function w(x){if(x.ch.length){for(const c of x.ch)w(c)}else{pos++;const a=TR.byCp.get(x.id);if(a)for(const o of allIn(a,[])){ord++;if(qOpen(o))iss++}}})(n);
+  return{pos,ord,iss}}
+
+/* ---------- строки выровненного представления ---------- */
+function buildLines(){
+  TR.bm=new Map();
+  const L=[],q=TR.q.trim().toLowerCase(),filtering=!!q||TR.flt!=='all';
+  TR.lineOf=new Map();TR.exLine=new Map();TR.num=[];
+  let num=0,cnt=[];
+  const lab=d=>{if(d===0){cnt=[++num];return String(num)}cnt.length=Math.min(cnt.length,d+1);cnt[d]=(cnt[d]||0)+1;cnt.length=d+1;return cnt.join('.')};
+  const omatch=o=>!q||(o.art+' '+o.name+' '+o.manuf+' '+o.code).toLowerCase().includes(q);
+  function push(l,r,n){const i=L.length;L.push({l,r,n});
+    if(r&&r.t==='o'){TR.lineOf.set(r.o.id,i);if(r.d===0)TR.num[parseInt(r.num,10)]=r.o.id}
+    if(l&&l.t==='ex'&&!TR.exLine.has(l.id))TR.exLine.set(l.id,i);if(l&&l.t==='cp'&&l.inl)TR.exLine.set(l.n.rows[0],i)}
+  function block(n,d){
+    if(TR.flt==='nolink')return;
+    const ords=TR.byCp.get(n.id)||[],R=flat(ords,0,[]),RA=allIn(ords,[]);
+    let iss=0,nw=0;for(const o of RA){if(qOpen(o))iss++;if(o.isNew)nw++}
+    let used=0;for(const id of n.rows)if(TR.exMap.has(id))used++;
+    if(TR.flt==='issues'&&!iss)return;
+    if(TR.flt==='new'&&!nw)return;
+    if(TR.flt==='rest'&&!(n.rows.length&&used<n.rows.length))return;
+    if(TR.flt==='empty'&&R.length)return;
+    if(q){let ok=n.name.toLowerCase().includes(q)||RA.some(omatch);
+      if(!ok&&TR.mode==='all')for(const id of n.rows){if(S.rows[id].s.includes(q)){ok=true;break}}
+      if(!ok)return}
+    /* позиция договора напротив 1-й заказной; остальные заказные — напротив пустых строк; строки Excel — ниже */
+    const Ls=[{t:'cp',n,d,iss,cnt:RA.filter(x=>x.kind!=='g').length,used,tot:n.rows.length,inl:inl(n)}];
+    for(let i=1;i<R.length;i++)Ls.push({t:'lpad',n});
+    if(TR.mode==='all'&&n.rows.length>1&&xOpen(n))for(const id of n.rows)Ls.push({t:'ex',id,d:d+1});
+    const H=Math.max(Ls.length,R.length,1);
+    for(let i=0;i<H;i++){
+      let r=null;if(i<R.length)r={t:'o',o:R[i].o,d:R[i].d,num:lab(R[i].d)};else if(i===0)r={t:'empty',n};
+      push(Ls[i]||{t:'lpad2'},r,n);
+    }
+  }
+  function walk(ns,d){for(const n of ns){
+    if(n.ch.length){const col=TR.cc.has(n.id)&&!filtering,st=L.length;push({t:'cg',n,d,col},{t:'rcg',n,d,col},n);if(!col)walk(n.ch,d+1);if(!col&&L.length===st+1)L.pop()}
+    else block(n,d)}}
+  walk(S.roots,0);
+  /* заказные без договорной позиции — «куча» в конце */
+  if(TR.flt==='all'||TR.flt==='issues'||TR.flt==='new'||TR.flt==='nolink'){
+    const P=TR.byCp.get('_')||[];
+    let list=P;
+    if(q||TR.flt==='issues'||TR.flt==='new')list=P.filter(o=>subSome(o,x=>omatch(x)&&(TR.flt!=='issues'||qOpen(x))&&(TR.flt!=='new'||x.isNew)));
+    let free=TR.exFree;if(q)free=free.filter(id=>S.rows[id].s.includes(q));
+    if(list.length||P.length||free.length){
+      push({t:'lfree',n:TR.exFree.length},{t:'ub',n:P.length,shown:list.length},null);
+      const R=flat(list,0,[]),Lx=(TR.mode==='all'&&TR.freeOpen)?free.map(id=>({t:'ex',id,d:0})):[];
+      const H=Math.max(R.length,Lx.length);
+      for(let i=0;i<H;i++)push(Lx[i]||{t:'lpad2'},i<R.length?{t:'o',o:R[i].o,d:R[i].d,num:lab(R[i].d)}:null,null);
+    }
+  }
+  TR.lines=L;
+}
+
+/* ---------- отрисовка ---------- */
+function ix(r,o){return {ru:unitDiff(r,o),bad:oRaw(o),open:qOpen(o)}}
+function relCp(id){const o=TR.selO&&TR.OM.get(TR.selO);return !!o&&cpOf(o)===id}
+function rightHTML_cg(r){const n=r.n,s=gStatsC(n);
+  return `<div class="rc rcg" data-cmd="cg" data-c="${n.id}" style="padding-left:${10+r.d*16}px"><button class="chev">${r.col?'▸':'▾'}</button><span class="nm">${esc(n.name)}</span><span class="lm">заказных ${s.ord}${s.iss?' · ⚠ '+s.iss:''}</span></div>`}
+const _gs=new Map();function gStatsC(n){return gStats(n)}
+function leftHTML(l,memo){
+  if(!l)return '<div class="lc lpad2"></div>';
+  if(l.t==='cg'){const n=l.n;let s=memo.get(n.id);if(!s){s=gStats(n);memo.set(n.id,s)}
+    return `<div class="lc lg" data-cmd="cg" data-c="${n.id}" style="padding-left:${6+l.d*16}px"><button class="chev">${l.col?'▸':'▾'}</button><span class="tgc">договорная</span><span class="nm">${esc(n.name)}</span><span class="lm">${s.pos} поз. · заказных ${s.ord}${s.iss?' · ⚠ '+s.iss:''}</span></div>`}
+  if(l.t==='cp'){const n=l.n;
+    const multi=TR.mode==='all'&&n.rows.length>1;
+    const chev=multi?`<button class="chev" data-cmd="xp" data-c="${n.id}" title="Строки Excel этой позиции (${n.rows.length})">${xOpen(n)?'▾':'▸'}</button>`:'<span class="chev0"></span>';
+    const badge=l.cnt?`<span class="chip ok" title="Заказных строк в позиции">🔗 ${l.cnt}</span><button class="ib mkp" data-cmd="mkpos" data-c="${n.id}" title="Добавить заказную строку в позицию (из необработанных строк Excel или из самой позиции)">＋</button>`:`<button class="chip no mk" data-cmd="mkpos" data-c="${n.id}" title="Создать заказную строку из этой позиции договора (и её строк Excel)">＋ заказная</button>`;
+    const iss=l.iss?`<button class="chip warn" data-cmd="ackb" data-c="${n.id}" title="Открытых расхождений с Excel: ${l.iss}. Клик — согласовать все в этой позиции">⚠ ${l.iss}</button>`:'';
+    const nm=`<span class="tgc" title="Позиция договорной спецификации">договорная</span><span class="nm" title="${esc(n.name)}">${esc(n.name)}</span>`+(multi&&l.tot?`<span class="lm2"> · Excel ${l.used}/${l.tot}</span>`:'');
+    let head;
+    if(l.inl){const r=S.rows[n.rows[0]],inCat=catalog.has(norm(r.art)),os=TR.exMap.get(r.id),o=os&&os[0];
+      const cls=o&&qOpen(o)?(unitDiff(r,o)?'ud':(qtyBad(o)?'qd':'')):'';
+      head=`<span class="lxi ${TR.selSrc.has(r.id)?'lk':''} ${TR.exSel.has(r.id)?'xs':''} ${cls} ${o?'':'free'}" data-x="${r.id}" title="Строка Excel №${r.n}: ${esc(r.name)} · ${esc(r.unit)} · ${r.qty}${inCat?'':' — артикула нет в 1С'}${o?'':' — не использована в заказной'}. Клик — выбрать для привязки"><span class="mono ${inCat?'':'nocat'}">${r.art?esc(r.art):'нет'}</span></span><span style="display:flex;align-items:center;gap:4px;min-width:0">${nm}</span>`}
+    else head=`<span style="grid-column:1/3;display:flex;align-items:center;gap:4px;padding-left:${6+l.d*16}px">${chev}${nm}</span>`;
+    return `<div class="lc lp ${TR.tgC===n.id?'tg':''} ${relCp(n.id)?'rel':''}" data-c="${n.id}">${head}<span>${esc(n.unit)}</span><span class="mono" style="text-align:right">${n.qty}</span><span class="lb">${badge}${iss}</span></div>`}
+  if(l.t==='lpad')return `<div class="lc lpad ${TR.tgC===l.n.id?'tg':''} ${relCp(l.n.id)?'rel':''}" data-c="${l.n.id}"></div>`;
+  if(l.t==='lpad2')return '<div class="lc lpad2"></div>';
+  if(l.t==='lfree')return `<div class="lc lfree" data-cmd="free"><button class="chev">${TR.freeOpen&&TR.mode==='all'?'▾':'▸'}</button><span class="nm">Строки Excel без договорной позиции</span><span class="lm">${fmt(l.n)}</span></div>`;
+  if(l.t==='ex'){const r=S.rows[l.id],os=TR.exMap.get(l.id),o=os&&os[0],inCat=catalog.has(norm(r.art));
+    let cls='',lab='осталась',tip='Не использована в заказной',ru=false;
+    if(o){const x=ix(r,o);ru=x.ru;cls=x.open?(x.ru?'ud':(qtyBad(o)?'qd':'')):(x.bad?'ak':'');
+      lab=`${cls==='ud'?'⚠ ед.':cls==='qd'?'≠':cls==='ak'?'✓*':'✓'} → ${o.isNew?'НОВАЯ':(o.code||'?')} ${esc(o.art)}`;
+      tip=(cls==='ud'?'Ед. изм. строки Excel «'+r.unit+'» ≠ заказной «'+o.unit+'». ':'')+(cls==='qd'?'Количество в заказной ('+o.qty+') ≠ Σ строк Excel ('+srcSum(o)+'). ':'')+'Заказная: '+(o.isNew?'НОВАЯ':o.code)+' · '+o.art+' · '+o.name}
+    return `<div class="lc lx ${TR.selSrc.has(r.id)?'lk':''} ${TR.exSel.has(r.id)?'xs':''} ${cls}" data-x="${r.id}"><span class="mono ${inCat?'':'nocat'}" style="padding-left:${6+l.d*16}px" title="${inCat?'':'Такого артикула нет в справочнике 1С'}">${r.art?esc(r.art):'<span class="dirty">нет</span>'}</span><span title="${esc(r.name)}">${esc(r.name)}</span><span class="mono ${ru?'uwarn':''}">${esc(r.unit)}</span><span class="mono" style="text-align:right">${r.qty}</span><span><button class="chip ${o&&!cls.match(/qd|ud/)?'ok':'warn'}" ${o?`data-cmd="jump" data-o="${o.id}"`:`data-cmd="mkx1" data-x="${r.id}"`} title="${o?esc(tip):'Создать заказную строку из этой строки Excel'}">${o?lab:'＋ заказная'}</button></span></div>`}
+  return '<div class="lc lpad2"></div>';
+}
+function rightHTML(r){
+  if(!r)return '<div class="rc"></div>';
+  if(r.t==='rcg')return rightHTML_cg(r);
+  if(r.t==='empty')return `<div class="rc rempty"><span>Нет заказных строк — выделите строки в списке «без договора» и свяжите с этой позицией</span><button class="btn sm" data-cmd="addnew" data-c="${r.n.id}">＋ Новая позиция</button></div>`;
+  if(r.t==='ub')return `<div class="rc rub"><span>Заказные строки без договорной позиции</span><span style="font-weight:400">${fmt(r.shown)} из ${fmt(r.n)}</span><button class="btn sm" data-cmd="selpile">Выделить все показанные</button></div>`;
+  const o=r.o,g=o.kind==='g',col=TR.oc.has(o.id),sel=TR.sel.has(o.id),d=r.d;
+  const code=o.isNew?'<span class="tagnew" title="Нужно создать в 1С">НОВАЯ</span>':`<input class="mono" data-f="code" value="${esc(o.code)}">`;
+  const nk=g?cntKids(o):0;
+  return `<div class="rr ${g?'rg':''} ${o.isNew?'new':''} ${TR.tgC&&cpOf(o)===TR.tgC?'tgo':''} ${sel?'sel':''} ${TR.selO===o.id?'osel':''} ${TR.flash.has(o.id)?'flash':''}" data-o="${o.id}">
+    <span class="rk"><input type="checkbox" data-f="" ${sel?'checked':''} tabindex="-1"></span>
+    <span class="rn" draggable="true" style="padding-left:${d*14}px" title="Клик — выделить (Shift — диапазон). Потяните на позицию договора слева, чтобы связать${g?' или на группу, чтобы вложить':''}">${g?`<button class="chev" data-cmd="og">${col?'▸':'▾'}</button>`:''}${esc(r.num)}${o.src.length?`<sup title="Связано строк Excel: ${o.src.length}">${o.src.length}</sup>`:''}</span>
+    <span>${code}</span>
+    <input class="mono" data-f="art" value="${esc(o.art)}" autocomplete="off"><input data-f="manuf" value="${esc(o.manuf)}">
+    <input data-f="name" value="${esc(o.name)}" autocomplete="off" ${nk?`title="В группе вложено: ${nk}"`:''}>
+    <input data-f="unit" class="${uCls(o)}" value="${esc(o.unit)}"><input data-f="qty" type="number" class="${g?gqCls(o):qCls(o)}" value="${o.qty}" style="text-align:right" title="${g?'Множитель состава группы: при проверке количество каждой вложенной строки умножается на это число. В самих строках — количество на одну группу.':esc(qtyTip(o))}">
+    <input data-f="comment" value="${esc(o.comment||'')}">
+    <span class="ract">${g?`<button class="ib" data-cmd="addc" title="Добавить новую позицию в группу">＋</button>`:''}${g&&TR.sel.size&&!TR.sel.has(o.id)?`<button class="ib on" data-cmd="into" title="Перенести выделенные в эту группу">⇥</button>`:''}${d>0?`<button class="ib" data-cmd="out" title="Вынести из группы">⇱</button>`:''}<button class="ib" data-cmd="grp" title="${g?'Разгруппировать (вложенные выйдут из группы)':'Сделать группой'}">${g?'⊟':'▤'}</button><button class="ib dn" data-cmd="del" title="Удалить">✕</button></span>
+  </div>`}
+function draw(){
+  TR.bm=new Map();
+  const vl=$('tv'),st=vl.scrollTop,h=vl.clientHeight||600;
+  const a=Math.max(0,Math.floor(st/LH)-6),b=Math.min(TR.lines.length,Math.ceil((st+h)/LH)+6),memo=new Map();
+  const ae=document.activeElement;let rf=null;
+  if(ae&&ae.dataset&&ae.dataset.f&&ae.closest&&ae.closest('#twin')){const row=ae.closest('.rr');if(row)rf={o:row.dataset.o,f:ae.dataset.f,s:ae.selectionStart,e:ae.selectionEnd}}
+  let s='';for(let i=a;i<b;i++){const ln=TR.lines[i];s+=`<div class="tl" data-i="${i}">${leftHTML(ln.l,memo)}${rightHTML(ln.r)}</div>`}
+  const w=$('twin');w.style.transform=`translateY(${a*LH}px)`;w.innerHTML=s;
+  if(rf){const el=w.querySelector(`.rr[data-o="${rf.o}"] [data-f="${rf.f}"]`);if(el){TR.noFocus=true;try{el.focus({preventScroll:true});if(rf.s!=null)el.setSelectionRange(rf.s,rf.e)}catch(_){}TR.noFocus=false;if(TR.ac){TR.ac.inp=el;if(!document.activeElement||document.activeElement!==el)acHide();else acShow(el)}}else if(TR.ac)acHide()}else if(TR.ac&&!(ae&&ae===TR.ac.inp))acHide()
+}
+function relines(){buildLines();$('tsp').style.height=(TR.lines.length*LH+26)+'px';draw()}
+function relayout(){rebuild();relines();tStat();updateInfo();updateBar()}
+function tStat(){
+  if(!TR.O)return;let linked=0,iss=0,nw=0,tot=TR.O.length;
+  for(const o of TR.O){if(cpOf(o))linked++;if(qOpen(o))iss++;if(o.isNew)nw++}
+  $('stat').textContent=`Заказная: ${fmt(tot)} строк · связано с договором ${fmt(linked)} · без связи ${fmt(tot-linked)}${nw?' · новых для 1С '+fmt(nw):''}`;
+  $('statBar').style.width=(tot?linked/tot*100:0)+'%';
+  $('tIss').textContent=iss?'Расхождений с Excel: '+fmt(iss):'Расхождений с Excel нет';
+  $('tmeta').textContent=`${fmt(S.rows.length)} строк Excel · ${fmt(TR.terms.length)} позиций договора`;
+}
+function scrollToLine(i){const vl=$('tv');vl.scrollTop=Math.max(0,i*LH-(vl.clientHeight||600)/3);draw()}
+function expandAncestors(nodeId){let n=idx.get(nodeId);while(n){TR.cc.delete(n.id);n=n.p?idx.get(n.p):null}}
+function scrollToOrder(id){
+  let o=TR.OM.get(id);if(!o)return;
+  let p=o;while(p.par){p=TR.OM.get(p.par);if(!p)break;TR.oc.delete(p.id)}
+  const cp=cpOf(o);if(cp)expandAncestors(cp);
+  buildLines();$('tsp').style.height=(TR.lines.length*LH+26)+'px';
+  const i=TR.lineOf.get(id);if(i!==undefined)scrollToLine(i);else draw()}
+function jumpToExcel(id){
+  const r=S.rows[id];let n=null;for(const lid of r.links){const x=idx.get(lid);if(x&&!x.ch.length){n=x;break}}
+  if(TR.mode!=='all'){TR.mode='all';$('tMode').value='all'}
+  if(n){TR.xo.set(n.id,true);expandAncestors(n.id)}else TR.freeOpen=true;
+  buildLines();$('tsp').style.height=(TR.lines.length*LH+26)+'px';
+  const i=TR.exLine.get(id);if(i!==undefined)scrollToLine(i);else toast('Эта строка Excel скрыта текущим фильтром или поиском')}
+
+/* ---------- выбор / подсветка ---------- */
+function setSel(id){TR.selO=id;const o=id&&TR.OM.get(id);TR.selSrc=new Set(o?o.src:[])}
+function paintSel(){draw();return;document.querySelectorAll('#twin .rr').forEach(e=>e.classList.toggle('osel',e.dataset.o===TR.selO));document.querySelectorAll('#twin .lx').forEach(e=>e.classList.toggle('lk',TR.selSrc.has(+e.dataset.x)))}
+function selToggle(oid,shift){
+  const i=TR.lineOf.get(oid);
+  if(shift&&TR.anchor>=0&&i!==undefined){const a=Math.min(TR.anchor,i),b=Math.max(TR.anchor,i);for(let j=a;j<=b;j++){const r=TR.lines[j].r;if(r&&r.t==='o')TR.sel.add(r.o.id)}}
+  else{TR.sel.has(oid)?TR.sel.delete(oid):TR.sel.add(oid);TR.anchor=i===undefined?-1:i}
+  draw();updateBar()}
+function selTop(){const out=[];
+  for(const id of TR.sel){const o=TR.OM.get(id);if(!o)continue;let a=o,skip=false;while(a.par){a=TR.OM.get(a.par);if(!a)break;if(TR.sel.has(a.id)){skip=true;break}}if(!skip)out.push(o)}
+  out.sort((x,y)=>(TR.lineOf.has(x.id)?TR.lineOf.get(x.id):1e9)-(TR.lineOf.has(y.id)?TR.lineOf.get(y.id):1e9));return out}
+
+/* ---------- информация о выбранной заказной строке + связанные строки Excel ---------- */
+function updateCinfo(){
+  const b=$('cinfo'),n=TR.tgC&&idx.get(TR.tgC);
+  if(!n||n.ch.length){b.classList.add('hidden');return false}
+  const A=blockOrders(n.id).filter(o=>o.kind!=='g'),nw=A.filter(o=>o.isNew).length,qb=A.filter(qOpen).length,qa=A.filter(o=>oRaw(o)&&ackValid(o)).length;
+  const rest=n.rows.filter(id=>!(TR.exMap.get(id)||[]).length).length,xs=n.rows.reduce((a,id)=>a+S.rows[id].qty,0);
+  b.classList.remove('hidden');
+  b.innerHTML=`<span>Позиция договора: <b>${esc(n.name)}</b> (${esc(n.unit)}, ${n.qty}) · заказных строк: <b>${A.length}</b> (количество и ед. изм. сверяются только со связанными строками Excel)`+
+    `${nw?` · новых (нет в 1С): <b>${nw}</b>`:''}${n.rows.length?(rest?` · <b style="color:#b35f00">не обработано строк Excel: ${rest}</b>`:' · все строки Excel обработаны'):' · строк Excel нет'}${(()=>{const bi=blkInfo(n.id);return ` · Σ заказных = <b>${bi.ord}</b> · ${bi.hasEx?'Σ Excel':'в договоре'} = <b>${bi.ex}</b>`})()}`+
+    `${qb?` · <b style="color:var(--danger)">расхождение с Excel (кол-во/ед. изм.): ${qb} зак. строк</b>`:''}${qa?` · согласовано расхождений: ${qa}`:''}</span><span>`+
+    `<button class="btn sm pr" data-cmd="mkpos" data-c="${n.id}" title="Создать заказную строку из этой позиции: из необработанных строк Excel, а если их нет — из самой позиции договора">＋ Заказная из позиции</button> ${qb?`<button class="btn sm" data-cmd="ackb" data-c="${n.id}">Согласовать расхождения позиции (${qb})…</button> `:''}${n.rows.length?`<button class="btn sm" data-cmd="cdet">${TR.cdet?'Скрыть':'Показать'} строки Excel (${n.rows.length})</button> `:''}<button class="btn sm" data-cmd="tgclr">Снять выбор позиции</button></span>`;
+  return true}
+function updateInfo(){
+  const hasC=updateCinfo();
+  const b=$('oinfo'),dv=$('odet'),o=TR.selO&&TR.OM.get(TR.selO);
+  if(!o&&hasC&&TR.cdet){const n=idx.get(TR.tgC);dv.classList.remove('hidden');
+    dv.innerHTML=n.rows.slice(0,200).map(id=>{const r=S.rows[id],os=TR.exMap.get(id),x=os&&os[0];let cls='',lab='осталась',ru=false;
+      if(x){ru=unitDiff(r,x);cls=qOpen(x)?(ru?'⚠ ед.':(qtyBad(x)?'≠':'')):(oRaw(x)?'✓*':'✓');lab=`${cls||'✓'} → ${x.isNew?'НОВАЯ':(x.code||'?')} ${esc(x.art)}`}
+      return `<div class="dsrc"><span class="mono">${r.art?esc(r.art):'нет'}</span><span title="${esc(r.name)}">${esc(r.name)}</span><span class="mono" style="text-align:right">${r.qty}</span><span class="${ru?'uwarn':''}">${esc(r.unit)}</span><span>${lab}</span><span>${x?`<button class="ib" data-cmd="jump" data-o="${x.id}" title="Перейти к заказной строке">🔎</button>`:`<button class="ib" data-cmd="dxsel" data-x="${id}" title="Выбрать для привязки">☐</button>`}</span></div>`}).join('')}
+  else if(!o)dv.classList.add('hidden');
+  if(!o){b.classList.add('hidden');return}
+  const cnt=o.kind==='g'?0:o.src.length,sum=srcSum(o),m=mult(o),d=effQty(o)-sum,df=srcDiffRows(o),ak=ackValid(o)&&oRaw(o),cn=cpOf(o),node=cn&&idx.get(cn);
+  let st='';
+  if(cnt){st+=d?` · <b style="color:var(--danger)">расхождение ${d>0?'+':''}${d}</b>`:' · количество совпадает';
+    if(df.length){const m={};df.forEach(r=>m[r.unit]=(m[r.unit]||0)+r.qty);st+=` · <b style="color:#b35f00">⚠ ${df.length} стр. Excel в другой ед. изм.: ${Object.keys(m).map(u=>m[u]+' '+esc(u)).join(', ')} (входят в Σ)</b>`}
+    if(ak)st+=` · <span class="ackok">✓ согласовано: ${esc(o.ack.text)}</span>`}
+  else if(o.kind!=='g'){const b=blkOf(o);
+    if(b){st=b.ord!==b.ex?` · <b style="color:var(--danger)">Σ заказных по позиции (с учётом групп) = ${b.ord}, ${b.hasEx?'Σ Excel позиции':'в договоре'} = ${b.ex}: расхождение ${Math.round((b.ord-b.ex)*1e6)/1e6>0?'+':''}${Math.round((b.ord-b.ex)*1e6)/1e6}</b>`:` · <i>связанных строк Excel нет — сверка по позиции договора: совпадает (Σ ${b.ord})</i>`;if(ak)st+=` · <span class="ackok">✓ согласовано: ${esc(o.ack.text)}</span>`}
+    else st=' · <i>связанных строк Excel нет и нет позиции договора — сверка не выполняется</i>'}
+  else st=' · <i>группа: количество — множитель состава</i>';
+  b.classList.remove('hidden');
+  b.innerHTML=`<span>${o.kind==='g'?'Группа':'Заказная'}: <b>${esc(o.name)}</b> (${esc(o.unit)}) · позиция договора: <b>${node?esc(node.name):'не связана'}</b> · строк Excel: <b>${cnt}</b> · Σ Excel = <b>${sum}</b> · в заказной <b>${m!==1?o.qty+' × '+m+' (групп) = '+effQty(o):o.qty}</b>${st}</span><span>`+
+    `${cnt&&d&&m?`<button class="btn sm" data-cmd="fix">Выровнять по Excel (${Math.round(sum/m*1e4)/1e4}${m!==1?' × '+m:''})</button> `:''}${qOpen(o)?'<button class="btn sm" data-cmd="ack">Согласовать расхождение…</button> ':''}${ak?'<button class="btn sm" data-cmd="ackclr">Снять согласование</button> ':''}${cnt?`<button class="btn sm" data-cmd="det">${TR.det?'Скрыть':'Показать'} строки Excel (${cnt})</button> `:''}<button class="btn sm" data-cmd="selclr">Снять выбор</button></span>`;
+  if(TR.det&&cnt){dv.classList.remove('hidden');
+    dv.innerHTML=o.src.slice(0,200).map(id=>{const r=S.rows[id],ru=unitDiff(r,o);let nm='вне договора';for(const lid of r.links){const x=idx.get(lid);if(x){nm='в позиции: '+x.name;break}}
+      return `<div class="dsrc"><span class="mono">${r.art?esc(r.art):'нет'}</span><span title="${esc(r.name)}">${esc(r.name)}</span><span class="mono" style="text-align:right">${r.qty}</span><span class="${ru?'uwarn':''}">${esc(r.unit)}</span><span>${esc(nm)}</span><span><button class="ib" data-cmd="dtfind" data-x="${id}" title="Найти в дереве слева">🔎</button><button class="ib dn" data-cmd="dtdel" data-x="${id}" title="Отвязать от заказной">✕</button></span></div>`}).join('')+(cnt>200?`<div class="hint">Показаны первые 200 из ${cnt}</div>`:'')}
+  else dv.classList.add('hidden');
+}
+
+/* ---------- панель действий ---------- */
+function updateBar(){
+  const b=$('tbar'),ns=TR.sel.size,nx=TR.exSel.size;
+  if(!ns&&!nx){b.classList.add('hidden');return}
+  const tg=TR.tgC&&idx.get(TR.tgC),nm=tg?(tg.name.length>26?tg.name.slice(0,26)+'…':tg.name):'';
+  let h='';
+  if(ns){h+=`<span><b>${fmt(ns)}</b> заказных выделено</span>`+(tg?`<button class="btn pr" data-cmd="link">→ Связать с «${esc(nm)}»</button><button class="btn" data-cmd="linkseq">⇣ По одной, начиная с неё</button>`:'<span style="opacity:.8">кликните слева позицию договора</span>')+
+    `<button class="btn" data-cmd="unlink">Отвязать от договора</button><button class="btn" data-cmd="mkgrp">▤ Сгруппировать</button><button class="btn gh" data-cmd="selnone">✕</button>`}
+  if(nx){h+=(ns?'<span style="opacity:.6">|</span>':'')+`<span><b>${fmt(nx)}</b> строк Excel</span>`+(TR.selO?'<button class="btn pr" data-cmd="attach">← Привязать к выбранной заказной</button>':'<span style="opacity:.8">выберите заказную строку справа</span>')+'<button class="btn" data-cmd="mkx">＋ Создать заказные из строк Excel</button><button class="btn gh" data-cmd="xnone">✕</button>'}
+  b.innerHTML=h;b.classList.remove('hidden')}
+
+/* ---------- операции: связь с договором, группы ---------- */
+function afterMove(list,msg){
+  TR.flash=new Set(list.map(o=>o.id));TR.sel.clear();relayout();
+  if(list[0])scrollToOrder(list[0].id);
+  setTimeout(()=>{TR.flash=new Set();draw()},2300);if(msg)toast(msg)}
+function linkTo(list,cpId){for(const o of list){o.par=null;o.cp=cpId;o.auto=false;o.noauto=false}}
+function doLink(){const n=idx.get(TR.tgC);if(!n||n.ch.length){toast('Выберите слева позицию договора');return}
+  const L=selTop();if(!L.length)return;linkTo(L,n.id);afterMove(L,`Связано с «${n.name}»: ${L.length} — строки переехали к позиции`)}
+function doLinkSeq(){const L=selTop();if(!L.length)return;const st=TR.terms.findIndex(n=>n.id===TR.tgC);if(st<0){toast('Выберите слева позицию договора');return}
+  let c=0;for(let i=0;i<L.length&&st+i<TR.terms.length;i++){linkTo([L[i]],TR.terms[st+i].id);c++}
+  afterMove(L.slice(0,c),`По одной, начиная с «${TR.terms[st].name}»: ${c}`+(c<L.length?` (не хватило позиций договора: ${L.length-c} осталось без связи)`:''))}
+function doUnlink(){const L=selTop();for(const o of L){o.cp=null;o.auto=false;o.noauto=true}afterMove(L,'Отвязано от договора: '+L.length)}
+function makeGroup(o){o.kind='g';if(o.src.length)o.qty=1;TR.oc.delete(o.id);relayout();toast('Строка стала группой: её количество — множитель состава (сейчас ×'+o.qty+'). Добавьте вложенные позиции кнопкой ＋; группа связана с позицией договора вместе со всем содержимым')}
+function ungroup(g){const k=kidsOf(g).slice();for(const x of k){x.par=g.par||null;x.cp=g.par?null:g.cp}g.kind='p';relayout();toast(k.length?'Группа разгруппирована: вложенные позиции остались в той же позиции договора':'Строка больше не группа')}
+function addKid(g){const k=kidsOf(g);const o=mkO({par:g.id,isNew:true,name:'Новая позиция',seq:k.length?k[k.length-1].seq+1:++TR.seq});TR.oc.delete(g.id);relayout();focusRow(o.id,'art')}
+function addBlank(cpId){const o=mkO({cp:cpId||null,isNew:true,name:'Новая позиция'});relayout();focusRow(o.id,'art')}
+function focusRow(id,f){scrollToOrder(id);const el=document.querySelector(`#twin .rr[data-o="${id}"] [data-f="${f}"]`);if(el){el.focus();el.select&&el.select()}}
+function moveInto(g){const L=selTop().filter(o=>o!==g&&!isAnc(o,g));if(!L.length){toast('Нечего переносить в группу');return}
+  for(const o of L){o.par=g.id;o.cp=null}TR.oc.delete(g.id);afterMove(L,`Вложено в группу: ${L.length} — связаны с той же позицией договора`)}
+function takeOut(o){const p=TR.OM.get(o.par);if(!p)return;o.par=p.par||null;o.cp=o.par?null:p.cp;relayout()}
+function delOrder(o){const sub=allIn([o],[]);if(sub.length>1&&!confirm(`Удалить группу вместе с вложенными (${sub.length})?`))return;
+  const ids=new Set(sub.map(x=>x.id));TR.O=TR.O.filter(x=>!ids.has(x.id));ids.forEach(id=>{TR.OM.delete(id);TR.sel.delete(id)});if(ids.has(TR.selO))setSel(null);relayout()}
+function mkGroupFromSel(){const L=selTop();if(!L.length)return;
+  const cps=new Set(L.map(o=>o.cp||'_')),first=L[0],cp=TR.tgC&&idx.get(TR.tgC)&&!idx.get(TR.tgC).ch.length?TR.tgC:(first.par?null:first.cp);
+  const par=first.par||null;
+  const g=mkO({kind:'g',name:'Новая группа',unit:'компл.',qty:1,cp:par?null:cp,par,seq:first.seq});
+  for(const o of L){o.par=g.id;o.cp=null}
+  afterMove([g],`Создана группа из ${L.length} строк`+(cps.size>1?' (строки были в разных позициях — группа связана с '+(cp?'выбранной':'первой')+')':''));
+  focusRow(g.id,'name')}
+/* автосвязь: заказная ↔ строки Excel по артикулу+производителю, затем заказная → позиция договора по тому, где лежат её строки Excel */
+function autoLink(silent){
+  rebuild();const by=new Map();
+  for(const r of S.rows){if(!r.art)continue;const k=norm(r.art)+'|'+norm(r.manuf);let a=by.get(k);if(!a)by.set(k,a=[]);a.push(r.id)}
+  let nc=0,ns=0;
+  for(const o of TR.O){
+    if(o.par||o.noauto||o.kind==='g')continue;
+    if(o.cp&&!o.auto)continue;
+    if(!o.src.length&&o.art){
+      const c=(by.get(norm(o.art)+'|'+norm(o.manuf))||[]).filter(id=>!(TR.exMap.get(id)||[]).length);
+      if(c.length){o.src=c.slice();c.forEach(id=>TR.exMap.set(id,[o]));ns++}}
+    let cp=null;
+    for(const id of o.src){for(const lid of S.rows[id].links){const n=idx.get(lid);if(n&&!n.ch.length){cp=n.id;break}}if(cp)break}
+    if(cp&&cp!==o.cp){o.cp=cp;o.auto=true;nc++}
+  }
+  if(!silent){relayout();toast(nc||ns?`Автосвязь по артикулу и производителю: к договору ${fmt(nc)}${ns?', к строкам Excel '+fmt(ns):''}`:'Нечего связывать: у строк Excel нет договорной позиции (проверьте вкладку ①)')}
+  return nc}
+function ackBulk(list,label){const l=list.filter(qOpen);if(!l.length){toast('Открытых расхождений нет');return}
+  const t=askAck(label+' — открытых расхождений: '+l.length+'.\nОбщая причина согласования (например: запас, остаток допоставят позже):');if(!t)return;
+  l.forEach(o=>{o.ack={text:t,sig:oSig(o)}});relayout();toast('Согласовано расхождений: '+l.length)}
+function blockOrders(nodeId){return allIn(TR.byCp.get(nodeId)||[],[])}
+function attachExcel(){const o=TR.selO&&TR.OM.get(TR.selO);if(!o)return;let c=0;
+  for(const id of TR.exSel){for(const x of (TR.exMap.get(id)||[]))if(x!==o)x.src=x.src.filter(i=>i!==id);if(!o.src.includes(id)){o.src.push(id);c++}}
+  TR.exSel.clear();setSel(o.id);relayout();toast('Привязано строк Excel к заказной: '+c)}
+function exNode(r){for(const lid of r.links){const n=idx.get(lid);if(n&&!n.ch.length)return n.id}return null}
+function mkPos(cpId){const n=idx.get(cpId);if(!n||n.ch.length)return;
+  const un=n.rows.filter(id=>!(TR.exMap.get(id)||[]).length),made=[];
+  if(un.length)for(const id of un)made.push(mkO(orderFromRow(S.rows[id],{cp:cpId})));
+  else made.push(mkO({cp:cpId,isNew:true,name:n.name,unit:n.unit,qty:n.qty,seq:++TR.seq}));
+  TR.tgC=cpId;afterMove(made,un.length?`Создано заказных из строк Excel позиции: ${made.length}`:'Создана заказная строка из позиции договора (новая, нет в 1С) — выберите номенклатуру в «Артикул» / «Наименование»')}
+function mkEx1(id){const r=S.rows[id],o=mkO(orderFromRow(r,{cp:exNode(r)}));afterMove([o],'Создана заказная из строки Excel')}
+function makeFromExcel(){let c=0,first=null;
+  for(const id of TR.exSel){const r=S.rows[id];let cp=TR.tgC&&idx.get(TR.tgC)&&!idx.get(TR.tgC).ch.length?TR.tgC:null;
+    if(!cp)for(const lid of r.links){const n=idx.get(lid);if(n&&!n.ch.length){cp=n.id;break}}
+    for(const x of (TR.exMap.get(id)||[]))x.src=x.src.filter(i=>i!==id);
+    const o=mkO(orderFromRow(r,{cp}));if(!first)first=o;c++}
+  TR.exSel.clear();afterMove(first?[first]:[],'Создано заказных строк из Excel: '+c)}
+
+/* ---------- экспорт ---------- */
+function dl(name,rows){
+  const csv='﻿'+rows.map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
+function exportRows(onlyNew){
+  const rows=[['Позиция договора','№','Код 1С','Артикул','Производитель','Наименование','Ед.','Кол-во','Комментарий','Тип','№ строк Excel','Согласовано']];let num=0;
+  const pathOf=n=>{const p=[];let x=n;while(x){p.unshift(x.name);x=x.p?idx.get(x.p):null}return p.join(' / ')};
+  const emit=(list,path,d,pre)=>{list.forEach((o,i)=>{const lbl=d===0?String(++num):pre+'.'+(i+1);
+    if(!onlyNew||o.isNew)rows.push([path,lbl,o.isNew?'':o.code,o.art,o.manuf,o.name,o.unit,o.qty,o.comment||'',o.isNew?'НОВАЯ (нет в 1С)':(o.kind==='g'?'группа':''),o.src.map(id=>S.rows[id].n).join(', '),(oRaw(o)&&ackValid(o))?o.ack.text:'']);
+    const k=TR.kids.get(o.id);if(k)emit(k,path,d+1,lbl)})};
+  for(const n of TR.terms)emit(TR.byCp.get(n.id)||[],pathOf(n),0,'');
+  emit(TR.byCp.get('_')||[],'— без договорной позиции —',0,'');return rows}
+
+/* ---------- поиск с подстановкой в ячейках «Артикул» и «Наименование» ---------- */
+function acShow(inp){
+  const row=inp.closest('.rr');if(!row)return;
+  const items=catFind(inp.value,12),p=$('acpop');
+  TR.ac={oid:row.dataset.o,items,i:-1,inp};
+  p.innerHTML=(items.length?'<div class="ah">Справочник 1С: выберите позицию (↑↓ Enter) или оставьте введённое</div>':'<div class="ah">Не найдено в справочнике 1С — позиция останется «новой»</div>')+
+    items.map((it,k)=>`<div class="ai" data-k="${k}"><span class="mono">${it.code}</span><span class="mono">${esc(it.art)}</span><span title="${esc(it.name)}">${esc(it.name)}</span><span>${esc(it.unit)}</span><span>${esc(it.manuf)}</span></div>`).join('');
+  p.classList.remove('hidden');
+  const r=inp.getBoundingClientRect(),h=Math.min(300,items.length*28+30);
+  let top=r.bottom+2;if(top+h>innerHeight-8)top=Math.max(8,r.top-h-2);
+  p.style.left=Math.max(8,Math.min(r.left,innerWidth-Math.min(600,innerWidth*.94)-8))+'px';p.style.top=top+'px'}
+function acHide(){TR.ac=null;$('acpop').classList.add('hidden')}
+function acMark(){const p=$('acpop');p.querySelectorAll('.ai').forEach((x,k)=>x.classList.toggle('on',k===TR.ac.i));const el=p.querySelector('.ai.on');if(el&&el.scrollIntoView)el.scrollIntoView({block:'nearest'})}
+function acPick(it){
+  const o=TR.ac&&TR.OM.get(TR.ac.oid);if(!o||!it){acHide();return}
+  o.was={art:o.art,name:o.name,code:o.code,isNew:!!o.isNew};
+  Object.assign(o,{isNew:false,code:it.code,art:it.art,manuf:it.manuf,name:it.name});
+  acHide();relayout();toast('Выбрано из 1С: '+it.art+(o.src.length?' · связи с Excel сохранены ('+o.src.length+')':''))}
+$('acpop').addEventListener('mousedown',e=>{e.preventDefault();const a=e.target.closest('.ai');if(a&&TR.ac)acPick(TR.ac.items[+a.dataset.k])});
+
+/* ---------- события ---------- */
+const TV=$('tvin');
+$('tv').addEventListener('scroll',()=>{draw();if(TR.ac)acHide()});
+new ResizeObserver(()=>draw()).observe($('tv'));
+$('tMode').addEventListener('change',e=>{TR.mode=e.target.value;relines()});
+$('tFlt').addEventListener('change',e=>{TR.flt=e.target.value;relines()});
+$('tQ').addEventListener('input',e=>{TR.q=e.target.value;relines()});
+TV.addEventListener('input',e=>{
+  const f=e.target.dataset&&e.target.dataset.f,row=e.target.closest&&e.target.closest('.rr');if(!f||!row)return;
+  const o=TR.OM.get(row.dataset.o);if(!o)return;
+  o[f]=f==='qty'?Number(e.target.value):e.target.value;TR.bm=new Map();
+  if(f==='art'||f==='name')acShow(e.target);
+  draw();updateInfo();tStat();
+  if(f==='qty'||f==='unit'){clearTimeout(TR._rl);TR._rl=setTimeout(()=>{buildLines();draw();updateInfo()},350)}});
+TV.addEventListener('focusin',e=>{
+  if(TR.noFocus)return;const f=e.target.dataset&&e.target.dataset.f,row=e.target.closest&&e.target.closest('.rr');
+  if(!row||!f){if(TR.ac&&!e.target.closest('#acpop'))acHide();return}
+  if(TR.selO!==row.dataset.o){setSel(row.dataset.o);paintSel();updateInfo();updateBar()}
+  if(f==='art'||f==='name')acShow(e.target);else if(TR.ac)acHide()});
+TV.addEventListener('focusout',()=>{setTimeout(()=>{if(TR.ac&&document.activeElement!==TR.ac.inp)acHide()},120)});
+TV.addEventListener('keydown',e=>{
+  if(!TR.ac)return;const L=TR.ac.items.length;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!L)return;const d=e.key==='ArrowDown'?1:-1;TR.ac.i=TR.ac.i<0?(d>0?0:L-1):(TR.ac.i+d+L)%L;acMark()}
+  else if(e.key==='Enter'&&TR.ac.i>=0){e.preventDefault();acPick(TR.ac.items[TR.ac.i])}
+  else if(e.key==='Escape'){acHide();e.stopPropagation()}});
+window.addEventListener('resize',()=>{if(TR.ac)acHide()});
+TV.addEventListener('click',e=>{
+  if(e.target.closest('[data-cmd]'))return;
+  const rr=e.target.closest('.rr');
+  if(rr&&!e.target.closest('input[data-f]:not([type=checkbox]),button')){
+    const oid=rr.dataset.o;
+    if(e.target.closest('.rn')||e.target.closest('.rk')){selToggle(oid,e.shiftKey)}
+    if(TR.selO!==oid){setSel(oid);paintSel();updateInfo();updateBar()}
+    return}
+  const lx=e.target.closest('.lx');
+  if(lx){const id=+lx.dataset.x;TR.exSel.has(id)?TR.exSel.delete(id):TR.exSel.add(id);lx.classList.toggle('xs',TR.exSel.has(id));updateBar();return}
+  const li=e.target.closest('.lxi');
+  if(li){const id=+li.dataset.x;TR.exSel.has(id)?TR.exSel.delete(id):TR.exSel.add(id);draw();updateBar();return}
+  const lc=e.target.closest('.lp,.lpad');
+  if(lc){const c=lc.dataset.c;TR.tgC=TR.tgC===c?null:c;draw();updateBar();updateInfo()}});
+/* перетаскивание: № строки → позиция договора (связать) или группа заказной (вложить) */
+TV.addEventListener('dragstart',e=>{
+  const rn=e.target.closest&&e.target.closest('.rn');if(!rn)return;const id=rn.closest('.rr').dataset.o;
+  if(!TR.sel.has(id)){TR.sel.clear();TR.sel.add(id);draw();updateBar()}
+  if(e.dataTransfer){e.dataTransfer.setData('text/plain','orders');e.dataTransfer.effectAllowed='move'}});
+function dropTarget(e){return e.target.closest&&(e.target.closest('.lp,.lpad')||e.target.closest('.rr.rg'))}
+TV.addEventListener('dragover',e=>{const t=dropTarget(e);if(t){e.preventDefault();t.classList.add('dropping')}});
+TV.addEventListener('dragleave',e=>{const t=dropTarget(e);if(t)t.classList.remove('dropping')});
+TV.addEventListener('drop',e=>{
+  const t=dropTarget(e);if(!t)return;e.preventDefault();t.classList.remove('dropping');
+  if(t.classList.contains('rr')){moveInto(TR.OM.get(t.dataset.o))}
+  else{TR.tgC=t.dataset.c;doLink()}});
+/* единая диспетчеризация команд */
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-cmd]');if(!c||!$('tab-eng').contains(c))return;
+  const cmd=c.dataset.cmd,row=c.closest('.rr'),o=row&&TR.OM.get(row.dataset.o),selO=TR.selO&&TR.OM.get(TR.selO);
+  switch(cmd){
+    case 'cg':{const id=c.dataset.c;TR.cc.has(id)?TR.cc.delete(id):TR.cc.add(id);relines();break}
+    case 'xp':{const n=idx.get(c.dataset.c);TR.xo.set(n.id,!xOpen(n));relines();break}
+    case 'free':{TR.freeOpen=!TR.freeOpen;if(TR.mode!=='all'){TR.mode='all';$('tMode').value='all'}relines();break}
+    case 'og':{if(o){TR.oc.has(o.id)?TR.oc.delete(o.id):TR.oc.add(o.id);relines()}break}
+    case 'grp':{if(o)(o.kind==='g'?ungroup(o):makeGroup(o));break}
+    case 'addc':{if(o)addKid(o);break}
+    case 'into':{if(o)moveInto(o);break}
+    case 'out':{if(o)takeOut(o);break}
+    case 'del':{if(o)delOrder(o);break}
+    case 'addnew':{addBlank(c.dataset.c);break}
+    case 'addrow':{const n=TR.tgC&&idx.get(TR.tgC);addBlank(n&&!n.ch.length?n.id:null);break}
+    case 'ackb':{const n=idx.get(c.dataset.c);ackBulk(blockOrders(n.id),'Позиция «'+n.name+'»');break}
+    case 'jump':{scrollToOrder(c.dataset.o);setSel(c.dataset.o);paintSel();updateInfo();TR.flash=new Set([c.dataset.o]);draw();setTimeout(()=>{TR.flash=new Set();draw()},2300);break}
+    case 'selpile':{TR.sel=new Set(TR.lines.filter(l=>l.r&&l.r.t==='o'&&l.r.d===0&&!cpOf(l.r.o)).map(l=>l.r.o.id));draw();updateBar();break}
+    case 'mkpos':mkPos(c.dataset.c);break;
+    case 'mkx1':mkEx1(+c.dataset.x);break;
+    case 'link':doLink();break;case 'linkseq':doLinkSeq();break;case 'unlink':doUnlink();break;case 'mkgrp':mkGroupFromSel();break;
+    case 'selnone':{TR.sel.clear();draw();updateBar();break}
+    case 'xnone':{TR.exSel.clear();draw();updateBar();break}
+    case 'attach':attachExcel();break;case 'mkx':makeFromExcel();break;
+    case 'pickn':{const s=prompt('Номера заказных строк (как в колонке №), например: 1-5, 60-70','1-5, 60-70');if(!s)break;
+      let k=0;for(const part of s.split(/[,;\s]+/)){const m=part.match(/^(\d+)(?:-(\d+))?$/);if(!m)continue;const a=+m[1],b=m[2]?+m[2]:a;for(let i=a;i<=b;i++){const id=TR.num[i];if(id){TR.sel.add(id);k++}}}
+      draw();updateBar();toast('Выделено заказных строк: '+k);break}
+    case 'expand':{TR.cc.clear();for(const n of TR.terms)TR.xo.set(n.id,true);TR.oc.clear();relines();break}
+    case 'collapse':{(function w(ns){for(const n of ns){if(n.ch.length){TR.cc.add(n.id);w(n.ch)}}})(S.roots);for(const n of TR.terms)TR.xo.set(n.id,false);TR.O.forEach(x=>{if(x.kind==='g')TR.oc.add(x.id)});TR.freeOpen=false;relines();break}
+    case 'autolink':{TR.O.forEach(o=>{if(!o.cp)o.noauto=false});autoLink();break}
+    case 'prefill':{const r=prefillMore();autoLink(true);relayout();toast(`Добавлено заказных по артикулам: ${fmt(r.c)} · без артикула в 1С: ${fmt(r.miss)}`);break}
+    case 'ackdoc':ackBulk(TR.O,'Весь документ');break;
+    case 'csv':{dl('zakaznaya_spec.csv',exportRows(false));break}
+    case 'csvnew':{const r=exportRows(true);if(r.length===1){toast('Новых позиций нет');break}dl('new_for_1c.csv',r);toast('Выгружено позиций для создания в 1С: '+(r.length-1));break}
+    case 'demo':{if(S.roots.length&&!confirm('Договорная будет заменена примером (одна группа из 15 строк). Продолжить?'))break;demoContract();break}
+    /* панель выбранной заказной */
+    case 'fix':{if(selO){const m=mult(selO);if(m){selO.qty=Math.round(srcSum(selO)/m*1e4)/1e4;relayout()}}break}
+    case 'ack':{if(selO){const t=askAck('Почему расхождение допустимо? (например: запас на монтаж, остаток допоставят позже)');if(t){selO.ack={text:t,sig:oSig(selO)};relayout();toast('Расхождение согласовано')}}break}
+    case 'ackclr':{if(selO){delete selO.ack;relayout()}break}
+    case 'det':{TR.det=!TR.det;updateInfo();break}
+    case 'cdet':{TR.cdet=!TR.cdet;updateInfo();break}
+    case 'tgclr':{TR.tgC=null;draw();updateBar();updateInfo();break}
+    case 'dxsel':{const id=+c.dataset.x;TR.exSel.has(id)?TR.exSel.delete(id):TR.exSel.add(id);updateBar();break}
+    case 'selclr':{setSel(null);paintSel();updateInfo();draw();break}
+    case 'dtfind':jumpToExcel(+c.dataset.x);break;
+    case 'dtdel':{if(selO){selO.src=selO.src.filter(i=>i!==+c.dataset.x);relayout();toast('Строка Excel отвязана от заказной')}break}
+  }});
+function demoContract(){
+  resetAll();
+  const g=addChild(null,mkNode({kind:'g',name:'Система оповещения (пример)'}));
+  const names=['Центральный коммутатор ARMTELICS','Модуль контроля линий NCU','Модуль реле NCU-REL','Усилитель мощности TDA','Пульт диспетчерский TOP-DIS','Громкоговоритель рупорный AR','Блок питания 12В','Аккумулятор 12В','Кабель КПСЭнг(A)-FRLS','Короб пластиковый кабельный','Лоток перфорированный','Шкаф телекоммуникационный','Шина заземления','Светильник аварийный','Дюбель-гвоздь'];
+  names.forEach((nm,i)=>addChild(g,mkNode({name:nm,unit:(i>=8&&i<=10)?'м':'шт.',qty:5+i*3})));
+  S.exp.add(g.id);afterChange();validate();relayout();toast('Собрана договорная: группа из 15 строк. Выделите заказные (кнопка «№…») и свяжите с позициями')}
+function tOpen(){
+  const c=prefill();validate();const l=autoLink(true);relayout();
+  if(c)toast(`Заказная предзаполнена по артикулам: ${fmt(c)} строк, связано с договором автоматически: ${fmt(l)}`)}
+
+/* ===================== TAB 3: вид договора ===================== */
+function renderPrev(){
+  let lines=[],hiddenCnt=0,num=0,LIM=500;
+  (function walk(nodes,d){for(const n of nodes){
+    if(n.hidden){hiddenCnt+=1;continue}
+    if(lines.length>=LIM)return;
+    const kids=n.ch.length&&!n.hideKids;
+    lines.push({n,d,g:n.ch.length>0||n.kind==='g'&&!n.rows.length,num:++num});
+    if(n.ch.length&&n.hideKids)hiddenCnt+=n.ch.length;
+    if(kids)walk(n.ch,d+1);
+  }})(S.roots,0);
+  $('pv').innerHTML=`<table><thead><tr><th style="width:60px">№</th><th>Наименование</th><th style="width:70px">Ед.</th><th style="width:90px">Кол-во</th><th style="width:150px">Состав (скрыт в договоре)</th></tr></thead><tbody>
+  ${lines.map(l=>{const n=l.n,hasKids=n.ch.length>0;return `<tr class="${hasKids?'g':''}"><td>${l.num}</td><td style="padding-left:${10+l.d*20}px">${esc(n.name)}</td><td>${hasKids?'':esc(n.unit)}</td><td>${hasKids?'':n.qty}</td><td style="color:var(--muted);font-size:12px">${(n.hideKids&&hasKids)?cntRec(n)+' стр. Excel / '+n.ch.length+' поз. скрыто':(!hasKids&&n.rows.length>1?n.rows.length+' стр. Excel внутри':'')}</td></tr>`}).join('')||'<tr><td colspan="5" style="padding:20px;color:var(--faint)">Договорная пуста</td></tr>'}</tbody></table>
+  <div class="hint">Так позиции увидит заказчик. Скрытых строк, вошедших в итоги: ${fmt(hiddenCnt)}${lines.length>=LIM?` · показаны первые ${LIM} строк`:''}</div>`;
+}
+
+/* ===================== TABS ===================== */
+function closeFull(){document.querySelectorAll('.pane.full').forEach(p=>p.classList.remove('full'));document.querySelectorAll('[data-full]').forEach(b=>b.textContent='⤢ На весь экран')}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-full]');if(!b)return;
+  const p=b.closest('.pane'),on=!p.classList.contains('full');closeFull();
+  if(on){p.classList.add('full');b.textContent='⤡ Свернуть (Esc)'}
+  setTimeout(()=>{if(S.tab==='mark')renderVL();else if(S.tab==='eng')draw()},30);
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!TR.ac)closeFull()});
+document.querySelector('.tabs').addEventListener('click',e=>{
+  const b=e.target.closest('.tab');if(!b)return;
+  closeFull();S.tab=b.dataset.tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));
+  ['mark','eng','prev'].forEach(k=>{const m=$('tab-'+k);m.classList.toggle('hidden',k!==S.tab);if((k==='prev'||k==='eng')&&k===S.tab)m.style.display='flex'});
+  if(S.tab==='mark'){renderVL();updateStats()}
+  if(S.tab==='eng')tOpen();
+  if(S.tab==='prev')renderPrev();
+});
+
+/* ===================== INIT ===================== */
+renderTree();updateStats();refreshView();updateSelbar();
+
+</script>
+</body>
+</html>
