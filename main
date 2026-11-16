@@ -256,7 +256,7 @@ button.chip{border:0;cursor:pointer;font-family:inherit}
 .lc.lp .lxi.qd{box-shadow:inset -3px 0 0 var(--danger)}
 .lc.lp .lxi.ud{box-shadow:inset -3px 0 0 #e07b00}
 #cinfo{flex:none;flex-basis:auto}
-.tgc{flex:none;font-size:9.5px;font-weight:600;color:#3b5aa8;background:#e3ebfb;border:1px solid #b9c9ee;border-radius:3px;padding:0 4px;line-height:15px;text-transform:uppercase;letter-spacing:.2px}
+.tgc{flex:none;font-size:9.5px;font-weight:600;color:#3b5aa8;background:#e3ebfb;border:1px solid #b9c9ee;border-radius:3px;padding:0 4px;line-height:15px;text-transform:none;letter-spacing:0}
 .lc.lg .tgc{background:#fff;}
 .lc.lp .nm{flex:1}
 button.chip.mk{background:#fff3cf;color:#8a5a00;cursor:pointer}
@@ -688,7 +688,11 @@ function rebuild(){
   TR.exFree=[];for(const r of S.rows)if(!r.links.length)TR.exFree.push(r.id);
 }
 function xOpen(n){const v=TR.xo.get(n.id);return v===undefined?true:v}
-function inl(n){return TR.mode==='all'&&n.rows.length===1}   /* единственная строка Excel позиции показывается в той же строке, без дубля */
+/* В режиме «только договорные строки» состав Excel всё равно нужен для разделов
+   и вручную созданных позиций. Зеркальные строки (strict) остаются скрытыми. */
+function showExcel(n){return TR.mode==='all'||n.kind==='g'||!n.strict}
+function inl(n){return TR.mode==='all'&&n.rows.length===1}   /* одна строка Excel в зеркальном режиме показывается в строке позиции */
+function hasExcelRows(n){return showExcel(n)&&n.rows.length>0&&!inl(n)}
 function gStats(n){let pos=0,ord=0,iss=0;
   (function w(x){if(x.ch.length){for(const c of x.ch)w(c)}else{pos++;const a=TR.byCp.get(x.id);if(a)for(const o of allIn(a,[])){ord++;if(qOpen(o))iss++}}})(n);
   return{pos,ord,iss}}
@@ -714,12 +718,12 @@ function buildLines(){
     if(TR.flt==='rest'&&!(n.rows.length&&used<n.rows.length))return;
     if(TR.flt==='empty'&&R.length)return;
     if(q){let ok=n.name.toLowerCase().includes(q)||RA.some(omatch);
-      if(!ok&&TR.mode==='all')for(const id of n.rows){if(S.rows[id].s.includes(q)){ok=true;break}}
+      if(!ok&&showExcel(n))for(const id of n.rows){if(S.rows[id].s.includes(q)){ok=true;break}}
       if(!ok)return}
     /* позиция договора напротив 1-й заказной; остальные заказные — напротив пустых строк; строки Excel — ниже */
     const Ls=[{t:'cp',n,d,iss,cnt:RA.filter(x=>x.kind!=='g').length,used,tot:n.rows.length,inl:inl(n)}];
     for(let i=1;i<R.length;i++)Ls.push({t:'lpad',n});
-    if(TR.mode==='all'&&n.rows.length>1&&xOpen(n))for(const id of n.rows)Ls.push({t:'ex',id,d:d+1});
+    if(hasExcelRows(n)&&xOpen(n))for(const id of n.rows)Ls.push({t:'ex',id,d:d+1});
     const H=Math.max(Ls.length,R.length,1);
     for(let i=0;i<H;i++){
       let r=null;if(i<R.length)r={t:'o',o:R[i].o,d:R[i].d,num:lab(R[i].d)};else if(i===0)r={t:'empty',n};
@@ -755,13 +759,13 @@ const _gs=new Map();function gStatsC(n){return gStats(n)}
 function leftHTML(l,memo){
   if(!l)return '<div class="lc lpad2"></div>';
   if(l.t==='cg'){const n=l.n;let s=memo.get(n.id);if(!s){s=gStats(n);memo.set(n.id,s)}
-    return `<div class="lc lg" data-cmd="cg" data-c="${n.id}" style="padding-left:${6+l.d*16}px"><button class="chev">${l.col?'▸':'▾'}</button><span class="tgc">договорная</span><span class="nm">${esc(n.name)}</span><span class="lm">${s.pos} поз. · заказных ${s.ord}${s.iss?' · ⚠ '+s.iss:''}</span></div>`}
+    return `<div class="lc lg" data-cmd="cg" data-c="${n.id}" style="padding-left:${6+l.d*16}px"><button class="chev">${l.col?'▸':'▾'}</button><span class="tgc" title="Договорная часть">д</span><span class="nm">${esc(n.name)}</span><span class="lm">${s.pos} поз. · заказных ${s.ord}${s.iss?' · ⚠ '+s.iss:''}</span></div>`}
   if(l.t==='cp'){const n=l.n;
-    const multi=TR.mode==='all'&&n.rows.length>1;
+    const multi=hasExcelRows(n);
     const chev=multi?`<button class="chev" data-cmd="xp" data-c="${n.id}" title="Строки Excel этой позиции (${n.rows.length})">${xOpen(n)?'▾':'▸'}</button>`:'<span class="chev0"></span>';
     const badge=l.cnt?`<span class="chip ok" title="Заказных строк в позиции">🔗 ${l.cnt}</span><button class="ib mkp" data-cmd="mkpos" data-c="${n.id}" title="Добавить заказную строку в позицию (из необработанных строк Excel или из самой позиции)">＋</button>`:`<button class="chip no mk" data-cmd="mkpos" data-c="${n.id}" title="Создать заказную строку из этой позиции договора (и её строк Excel)">＋ заказная</button>`;
     const iss=l.iss?`<button class="chip warn" data-cmd="ackb" data-c="${n.id}" title="Открытых расхождений с Excel: ${l.iss}. Клик — согласовать все в этой позиции">⚠ ${l.iss}</button>`:'';
-    const nm=`<span class="tgc" title="Позиция договорной спецификации">договорная</span><span class="nm" title="${esc(n.name)}">${esc(n.name)}</span>`+(multi&&l.tot?`<span class="lm2"> · Excel ${l.used}/${l.tot}</span>`:'');
+    const nm=`<span class="tgc" title="Позиция договорной спецификации">д</span><span class="nm" title="${esc(n.name)}">${esc(n.name)}</span>`+(multi&&l.tot?`<span class="lm2"> · Excel ${l.used}/${l.tot}</span>`:'');
     let head;
     if(l.inl){const r=S.rows[n.rows[0]],inCat=catalog.has(norm(r.art)),os=TR.exMap.get(r.id),o=os&&os[0];
       const cls=o&&qOpen(o)?(unitDiff(r,o)?'ud':(qtyBad(o)?'qd':'')):'';
