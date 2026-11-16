@@ -695,6 +695,8 @@ function inl(n){return TR.mode==='all'&&n.rows.length===1}   /* одна стр�
 function hasExcelRows(n){return showExcel(n)&&n.rows.length>0&&!inl(n)}
 function gStats(n){let pos=0,ord=0,iss=0;
   (function w(x){if(x.ch.length){for(const c of x.ch)w(c)}else{pos++;const a=TR.byCp.get(x.id);if(a)for(const o of allIn(a,[])){ord++;if(qOpen(o))iss++}}})(n);
+  /* В режиме «Только разделы» заказные строки могут быть привязаны прямо к группе. */
+  if(n.kind==='g'&&!n.ch.length){const a=TR.byCp.get(n.id)||[];for(const o of allIn(a,[])){ord++;if(qOpen(o))iss++}}
   return{pos,ord,iss}}
 
 /* ---------- строки выровненного представления ---------- */
@@ -730,15 +732,32 @@ function buildLines(){
       push(Ls[i]||{t:'lpad2'},r,n);
     }
   }
+  function groupRows(n,d){
+    if(TR.flt==='nolink')return;
+    const ords=TR.byCp.get(n.id)||[],R=flat(ords,0,[]),RA=allIn(ords,[]);
+    let iss=0,nw=0;for(const o of RA){if(qOpen(o))iss++;if(o.isNew)nw++}
+    let used=0;for(const id of n.rows)if(TR.exMap.has(id))used++;
+    if(TR.flt==='issues'&&!iss)return;
+    if(TR.flt==='new'&&!nw)return;
+    if(TR.flt==='rest'&&!(n.rows.length&&used<n.rows.length))return;
+    if(TR.flt==='empty'&&R.length)return;
+    if(q){let ok=n.name.toLowerCase().includes(q)||RA.some(omatch);
+      if(!ok&&showExcel(n))for(const id of n.rows){if(S.rows[id].s.includes(q)){ok=true;break}}
+      if(!ok)return}
+    const H=Math.max(n.rows.length,R.length);
+    for(let i=0;i<H;i++){
+      const l=i<n.rows.length?{t:'ex',id:n.rows[i],d:d+1}:{t:'lpad2'};
+      const r=i<R.length?{t:'o',o:R[i].o,d:R[i].d,num:lab(R[i].d)}:null;
+      push(l,r,n);
+    }
+  }
   function walk(ns,d){for(const n of ns){
-    if(n.ch.length){
+    /* Группа определяется типом узла, а не наличием дочерних позиций.
+       В режиме «Только разделы» группа сама содержит строки Excel и заказные связи. */
+    if(n.kind==='g'||n.ch.length){
       const col=TR.cc.has(n.id)&&!filtering,st=L.length;
       push({t:'cg',n,d,col},{t:'rcg',n,d,col},n);
-      /* В режиме «Только разделы» строки Excel привязаны к самому узлу-разделу,
-         а не к дочерним позициям. Показываем их непосредственно под заголовком раздела. */
-      if(!col&&showExcel(n)&&n.rows.length){
-        for(const id of n.rows)push({t:'ex',id,d:d+1},null,n);
-      }
+      if(!col&&n.rows.length)groupRows(n,d);
       if(!col)walk(n.ch,d+1);
       if(!col&&L.length===st+1)L.pop()
     }
