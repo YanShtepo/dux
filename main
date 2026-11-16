@@ -731,7 +731,17 @@ function buildLines(){
     }
   }
   function walk(ns,d){for(const n of ns){
-    if(n.ch.length){const col=TR.cc.has(n.id)&&!filtering,st=L.length;push({t:'cg',n,d,col},{t:'rcg',n,d,col},n);if(!col)walk(n.ch,d+1);if(!col&&L.length===st+1)L.pop()}
+    if(n.ch.length){
+      const col=TR.cc.has(n.id)&&!filtering,st=L.length;
+      push({t:'cg',n,d,col},{t:'rcg',n,d,col},n);
+      /* В режиме «Только разделы» строки Excel привязаны к самому узлу-разделу,
+         а не к дочерним позициям. Показываем их непосредственно под заголовком раздела. */
+      if(!col&&showExcel(n)&&n.rows.length){
+        for(const id of n.rows)push({t:'ex',id,d:d+1},null,n);
+      }
+      if(!col)walk(n.ch,d+1);
+      if(!col&&L.length===st+1)L.pop()
+    }
     else block(n,d)}}
   walk(S.roots,0);
   /* заказные без договорной позиции — «куча» в конце */
